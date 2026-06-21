@@ -1,4 +1,4 @@
--- Bird wings made by benre666
+-- Bird wings made by Nexpulvia
 -- Modified: Press "J" ONCE to fly. Includes mobile skin cycle button, non-draggable-while-flying WASD pad, and special barrel roll buttons (FORCED CONTINOUS SPIN).
 -- Down Press Q
 -- Wings Spin Press A Two Time (Triggered via "Barrel Roll L" button on mobile)
