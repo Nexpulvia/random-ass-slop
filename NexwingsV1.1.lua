@@ -1,4 +1,4 @@
--- Bird wings made by benre666
+-- Bird wings made by Nexpulvia
 -- Modified: Added configurable keybinds at the top of the script.
 
 ------------------------------------------------------------------------
