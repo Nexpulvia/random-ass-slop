@@ -17,13 +17,12 @@ imageLabel.BackgroundTransparency = 1
 imageLabel.Image = "rbxassetid://124553278896669"
 imageLabel.Parent = screenGui
 
--- Spawn in the middle
+
 imageLabel.Position = UDim2.new(0.5, -75, 0.5, -75)
 
--- Smooth tween to top right
 local tweenInfo = TweenInfo.new(
-    1.5,                    -- duration
-    Enum.EasingStyle.Quad,  -- smooth easing
+    1.5,                    
+    Enum.EasingStyle.Quad,  
     Enum.EasingDirection.Out
 )
 
@@ -33,30 +32,30 @@ tween:Play()
 
 -- Slow spin
 local rotation = 0
-local rotationSpeed = 45  -- degrees per second (nice and slow)
+local rotationSpeed = 45  
 
 RunService.RenderStepped:Connect(function(deltaTime)
     rotation = rotation + (rotationSpeed * deltaTime)
     imageLabel.Rotation = rotation % 360
 end)
 
---- Text Typewriter and Delete Effect ---
+
 
 local textLabel = Instance.new("TextLabel")
 textLabel.Name = "CreditText"
 textLabel.Size = UDim2.new(0, 500, 0, 100)
-textLabel.Position = UDim2.new(0.5, -250, 0.5, -50) -- Exactly in the center of the screen
+textLabel.Position = UDim2.new(0.5, -250, 0.5, -50) 
 textLabel.BackgroundTransparency = 1
-textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
-textLabel.TextSize = 48 -- Made the text size significantly bigger
+textLabel.TextColor3 = Color3.new(1, 1, 1) 
+textLabel.TextSize = 48 
 textLabel.Text = ""
 textLabel.Parent = screenGui
 
-local fullText = "Scripted by NEX"
+local fullText = "Scripted by NEX yo dih small🥀💔🥹"
 local typeSpeed = 0.1 
 local deleteSpeed = 0.08 
 
--- List of fonts to rapidly cycle through
+
 local fonts = {
     Enum.Font.SourceSansBold,
     Enum.Font.GothamBold,
@@ -89,12 +88,11 @@ task.spawn(function()
         textLabel.Font = fonts[math.random(1, #fonts)]
         textLabel.Text = string.sub(fullText, 1, i)
         task.wait(deleteSpeed)
-    end
-    
-    -- Completely clean up the text label when finished
+        end
+
     textLabel:Destroy()
     
-    -- --- Execution fires right here after the intro text finishes ---
+    
     local success, err = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Nexpulvia/random-ass-slop/refs/heads/main/Wings.lua"))()
     end)
