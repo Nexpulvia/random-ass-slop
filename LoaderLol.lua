@@ -5,9 +5,9 @@ local LOAD_STRING = [[
 local LOAD_DELAY = 2.0
 
 local CONFIG = {
-    Title = "Ro-Wrecker",
-    Subtitle = "Made by : Luckyxero",
-    Discord = "Discord : Workspace#0793",
+    Title = "Ro-Admin",
+    Subtitle = "Made by : Nexpulvia,SigmaLigma49",
+    Discord = "Discord : Nexpulvia",
     IntroMusicID = "608600954",
     ClickSoundID = "178104975",
     Sound2ID = "255881176",
