@@ -1,5 +1,5 @@
 local LOAD_STRING = [[
-    print("Hello from loader!")
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/Nexpulvia/random-ass-slop/refs/heads/main/P.A%20(Project%20Admin)'))()
 ]]
 
 local LOAD_DELAY = 2.0
