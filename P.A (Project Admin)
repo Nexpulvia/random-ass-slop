@@ -1,0 +1,2755 @@
+--[[
+---------------------------------------------------------------
+   Project Admin Made by Nexpulvia
+---------------------------------------------------------------
+   Credits:
+   - SethMilkman – base framework
+   - Edge, Moon, Zwolf, Hunter, Toon, Peyton, ATP – Infinite Yield system
+---------------------------------------------------------------
+--]]
+local Player = game.Players.LocalPlayer
+local gPlayers = game:GetService("Players")
+local admin = gPlayers.LocalPlayer.Name
+
+local services = {}
+local cmds = {}
+local std = {}
+
+local Version = '1.0.0'
+
+wait(0.1)
+
+services.players = gPlayers
+services.lighting = game:GetService('Lighting')
+services.workspace = game:GetService('Workspace')
+services.events = {}
+
+local cmdprefix = ';'
+local scriptprefix = '\\'
+local split = " "
+
+local AdminFolder = Instance.new("Folder", game.ContextActionService)
+AdminFolder.Name = "AdminList"
+AdminFolder.RobloxLocked = true
+
+_G.Admin = function(Admin)
+	local SValue = Instance.new("StringValue", AdminFolder)
+	SValue.Value = Admin
+	SValue.RobloxLocked = true
+end
+
+local admins = {
+	'Nexpulvia'
+}
+
+CMDs = {
+    "breakloops", "rejoin", "exit", "removecmd", "chatlogs", "serverinfo",
+    "explorer", "enable", "disable", "addalias", "removealias", "clraliases",
+    "noclip", "unnoclip", "fly", "unfly", "flyspeed", "vehiclefly", "unvehiclefly",
+    "vehicleflyspeed", "float", "unfloat", "spos", "setwaypointpos", "dpos",
+    "lpos", "clearpos", "spam", "unspam", "pmspam", "unpmspam", "spamspeed",
+    "esp", "noesp", "chams", "nochams", "locate", "unlocate", "xray", "unxray",
+    "spectate", "unspectate", "freecam", "unfreecam", "freecamspeed", "fctp",
+    "firstp", "thirdp", "maxzoom", "fov", "fixcam", "btools", "f3x", "delete",
+    "deleteclass", "lockworkspace", "unlockworkspace", "gotopart", "bringpart",
+    "ambient", "day", "night", "nofog", "brightness", "globalshadows",
+    "noglobalshadows", "restorelighting", "light", "nolight", "age", "os",
+    "bang", "unbang", "headsit", "kill", "bring", "fling", "unfling",
+    "loopoof", "unloopoof", "respawn", "refresh", "invisible", "weaken",
+    "unweaken", "strengthen", "unstrengthen", "speed", "hipheight", "jumppower",
+    "gravity", "sit", "jump", "stun", "unstun", "team", "goto", "loopgoto",
+    "unloopgoto", "clientbring", "loopbring", "unloopbring", "freeze", "thaw",
+    "tpposition", "offset", "notifyposition", "copyposition", "spawnpoint",
+    "nospawnpoint", "flashback", "animation", "dance", "undance", "spasm",
+    "unspasm", "headthrow", "noarms", "nolegs", "nolimbs", "naked", "blockhead",
+    "blockhats", "creeper", "drophats", "droptools", "spin", "unspin",
+    "spinhats", "unspinhats", "tools", "notools", "grabtools", "ungrabtools",
+    "copytools", "addplugin", "removeplugin"
+}
+
+local HelpData = {
+    {NAME = 'breakloops / break (cmd loops)', DESC = 'Stops any cmd loops (;100^1^cmd)'},
+    {NAME = 'rejoin / rj', DESC = 'Makes you rejoin the game'},
+    {NAME = 'exit', DESC = 'Kills roblox process'},
+    {NAME = 'removecmd / deletecmd', DESC = 'Removes a command until the admin is reloaded'},
+    {NAME = 'chatlogs / logs', DESC = 'Log what people say or whisper'},
+    {NAME = 'serverinfo / info', DESC = 'Gives you info about the server'},
+    {NAME = 'explorer / dex', DESC = 'Opens DEX explorer'},
+    {NAME = 'enable [inventory/playerlist/chat/all]', DESC = 'Toggles visibility of coregui items'},
+    {NAME = 'disable [inventory/playerlist/chat/all]', DESC = 'Toggles visibility of coregui items'},
+    {NAME = '', DESC = ''},
+    {NAME = 'addalias [cmd] [alias]', DESC = 'Adds an alias to a command'},
+    {NAME = 'removealias [alias]', DESC = 'Removes a custom alias'},
+    {NAME = 'clraliases', DESC = 'Removes all custom aliases'},
+    {NAME = '', DESC = ''},
+    {NAME = 'noclip', DESC = 'Go through objects'},
+    {NAME = 'unnoclip / clip', DESC = 'Disables noclip'},
+    {NAME = 'fly', DESC = 'Makes you fly'},
+    {NAME = 'unfly', DESC = 'Disables fly'},
+    {NAME = 'flyspeed [num]', DESC = 'Set fly speed (default is 20)'},
+    {NAME = 'vehiclefly / vfly', DESC = 'Makes you fly in a vehicle'},
+    {NAME = 'unvehiclefly / unvfly', DESC = 'Disables vehicle fly'},
+    {NAME = 'vehicleflyspeed  / vflyspeed [num]', DESC = 'Set vehicle fly speed'},
+    {NAME = 'float /  platform', DESC = 'Spawns a platform beneath you causing you to float'},
+    {NAME = 'unfloat / noplatform', DESC = 'Removes the platform'},
+    {NAME = '', DESC = ''},
+    {NAME = 'spos / setwaypoint [name]', DESC = 'Sets a waypoint at your position'},
+    {NAME = 'setwaypointpos [name] [X Y Z]', DESC = 'Sets a waypoint with specified coordinates'},
+    {NAME = 'dpos / deletewaypoint [name]', DESC = 'Deletes a waypoint'},
+    {NAME = 'lpos / waypoint [name]', DESC = 'Teleports player to a waypoint'},
+    {NAME = 'clearpos / cpos / clearwaypoints', DESC = 'Clears all waypoints'},
+    {NAME = '', DESC = ''},
+    {NAME = 'spam [text]', DESC = 'Makes you spam the chat'},
+    {NAME = 'unspam', DESC = 'Turns off spam'},
+    {NAME = 'pmspam [plr] [text]', DESC = 'Makes you spam a players whispers'},
+    {NAME = 'unpmspam [plr]', DESC = 'Turns off pm spam'},
+    {NAME = 'spamspeed [num]', DESC = 'How quickly you spam (default is 1)'},
+    {NAME = '', DESC = ''},
+    {NAME = 'esp', DESC = 'View all players and their status'},
+    {NAME = 'noesp / unesp', DESC = 'Removes esp'},
+    {NAME = 'chams', DESC = 'ESP but without text in the way'},
+    {NAME = 'nochams / unchams', DESC = 'Removes chams'},
+    {NAME = 'locate [plr]', DESC = 'View a single player and their status'},
+    {NAME = 'unlocate / nolocate [plr]', DESC = 'Removes locate'},
+    {NAME = 'xray', DESC = 'Makes all parts in workspace transparent'},
+    {NAME = 'unxray / noxray', DESC = 'Restores transparency'},
+    {NAME = '', DESC = ''},
+    {NAME = 'spectate / view [plr]', DESC = 'View a player'},
+    {NAME = 'unspectate / unview', DESC = 'Stops viewing player'},
+    {NAME = 'freecam / fc', DESC = 'Allows you to freely move camera around the game'},
+    {NAME = 'unfreecam / unfc', DESC = 'Disables freecam'},
+    {NAME = 'freecamspeed / fcspeed [num]', DESC = 'Adjusts freecam speed'},
+    {NAME = 'fctp / freecamtp', DESC = 'Teleports you to the location of freecam'},
+    {NAME = 'firstp', DESC = 'Forces camera to go into first person'},
+    {NAME = 'thirdp', DESC = 'Allows camera to go into third person'},
+    {NAME = 'maxzoom [num]', DESC = 'Maximum camera zoom'},
+    {NAME = 'fov [num]', DESC = 'Adjusts field of view (default is 70)'},
+    {NAME = 'fixcam', DESC = 'Fixes camera'},
+    {NAME = '', DESC = ''},
+    {NAME = 'btools (CLIENT)', DESC = 'Gives you building tools (DOES NOT REPLICATE)'},
+    {NAME = 'f3x (CLIENT)', DESC = 'Loads f3x tools'},
+    {NAME = 'delete [part name] (CLIENT)', DESC = 'Removes any part with a certain name from the workspace (DOES NOT REPLICATE)'},
+    {NAME = 'deleteclass / dc [class name] (CLIENT)', DESC = 'Removes any part with a certain classname from the workspace (DOES NOT REPLICATE)'},
+    {NAME = 'lockworkspace / lockws', DESC = 'Locks the whole workspace'},
+    {NAME = 'unlockworkspace / unlockws', DESC = 'Unlocks the whole workspace'},
+    {NAME = 'gotopart [part name]', DESC = 'Moves your character to a part or multiple parts'},
+    {NAME = 'bringpart [part name] (CLIENT)', DESC = 'Moves a part or multiple parts to your character'},
+    {NAME = '', DESC = ''},
+    {NAME = 'ambient [num] [num] [num] (CLIENT)', DESC = 'Changes ambient'},
+    {NAME = 'day (CLIENT)', DESC = 'Changes the time to day for the client'},
+    {NAME = 'night (CLIENT)', DESC = 'Changes the time to night for the client'},
+    {NAME = 'nofog (CLIENT)', DESC = 'Removes fog'},
+    {NAME = 'brightness [num] (CLIENT)', DESC = 'Changes the brightness lighting property'},
+    {NAME = 'globalshadows / gshadows (CLIENT)', DESC = 'Enables global shadows'},
+    {NAME = 'noglobalshadows / nogshadows (CLIENT)', DESC = 'Disables global shadows'},
+    {NAME = 'restorelighting / rlighting', DESC = 'Restores Lighting properties'},
+    {NAME = 'light [radius] (CLIENT)', DESC = 'Gives your player dynamic light'},
+    {NAME = 'nolight / unlight', DESC = 'Removes dynamic light from your player'},
+    {NAME = '', DESC = ''},
+    {NAME = 'age [plr]', DESC = 'Tells you the age of a player'},
+    {NAME = 'os [plr]', DESC = "Shows a player's platform"},
+    {NAME = 'bang [plr]', DESC = 'owo'},
+    {NAME = 'unbang [plr]', DESC = 'uwu'},
+    {NAME = 'headsit [plr]', DESC = 'Sit on a players head'},
+    {NAME = 'kill [plr]', DESC = 'Kills a player'},
+    {NAME = 'bring [plr] (TOOL)', DESC = 'Brings a player (YOU NEED A TOOL)'},
+    {NAME = 'fling', DESC = 'Flings anyone you touch'},
+    {NAME = 'unfling', DESC = 'Disables the fling command'},
+    {NAME = 'loopoof', DESC = 'Loops everyones character sounds (everyone can hear)'},
+    {NAME = 'unloopoof', DESC = 'Stops the oof chaos'},
+    {NAME = '', DESC = ''},
+    {NAME = 'respawn', DESC = 'Respawns you'},
+    {NAME = 'refresh / re', DESC = 'Respawns and brings you back to the same position'},
+    {NAME = 'invisible / invis', DESC = 'Makes you invisible to other players'},
+    {NAME = 'weaken [num]', DESC = 'Makes your character less dense'},
+    {NAME = 'unweaken', DESC = 'Sets your characters CustomPhysicalProperties to default'},
+    {NAME = 'strengthen [num]', DESC = 'Makes your character more dense (CustomPhysicalProperties)'},
+    {NAME = 'unstrengthen', DESC = 'Sets your characters CustomPhysicalProperties to default'},
+    {NAME = 'speed / ws [num]', DESC = 'Change your walkspeed'},
+    {NAME = 'hipheight / hheight [num]', DESC = 'Adjusts hip height'},
+    {NAME = 'jumppower / jpower [num]', DESC = 'Change a players jump height'},
+    {NAME = 'gravity / grav [num]', DESC = 'Change your gravity'},
+    {NAME = 'sit', DESC = 'Makes your character sit'},
+    {NAME = 'jump', DESC = 'Makes your character jump'},
+    {NAME = 'stun / platformstand', DESC = 'Enables PlatformStand'},
+    {NAME = 'unstun / unplatformstand', DESC = 'Disables PlatformStand'},
+    {NAME = 'team [team name] (CLIENT)', DESC = 'Changes your team. Sometimes fools localscripts.'},
+    {NAME = '', DESC = ''},
+    {NAME = 'goto [plr]', DESC = 'Go to a player'},
+    {NAME = 'loopgoto [plr] [distance] [delay]', DESC = 'Loop teleport to a player'},
+    {NAME = 'unloopgoto [plr]', DESC = 'Stops teleporting you to a player'},
+    {NAME = 'clientbring / cbring [plr] (CLIENT)', DESC = 'Bring a player'},
+    {NAME = 'loopbring [plr] [distance] [delay] (CLIENT)', DESC = 'Loop brings a player to you (useful for killing)'},
+    {NAME = 'unloopbring [plr]', DESC = 'Undoes loopbring'},
+    {NAME = 'freeze / fr [plr] (CLIENT)', DESC = 'Freezes a player'},
+    {NAME = 'thaw / unfr [plr] (CLIENT)', DESC = 'Unfreezes a player'},
+    {NAME = 'tpposition / tppos [X Y Z]', DESC = 'Teleports you to certain coordinates'},
+    {NAME = 'offset [X Y Z]', DESC = 'Offsets you by certain coordinates'},
+    {NAME = 'notifyposition / notifypos', DESC = 'Notifies you the coordinates of your character'},
+    {NAME = 'copyposition / copypos', DESC = 'Copies the coordinates of your character to your clipboard'},
+    {NAME = 'spawnpoint / spawn', DESC = 'Sets a position where you will spawn'},
+    {NAME = 'nospawnpoint / nospawn', DESC = 'Removes your custom spawn point'},
+    {NAME = 'flashback / diedtp', DESC = 'Teleports you to where you last died'},
+    {NAME = '', DESC = ''},
+    {NAME = 'animation / anim [ID] [speed]', DESC = 'Makes your character preform an animation (must be by roblox to replicate)'},
+    {NAME = 'dance', DESC = 'Makes you  d a n c e'},
+    {NAME = 'undance', DESC = 'Stops dance animations'},
+    {NAME = 'spasm', DESC = 'Makes you  c r a z y'},
+    {NAME = 'unspasm', DESC = 'Stops spasm'},
+    {NAME = 'headthrow', DESC = 'Simply makes you throw your head'},
+    {NAME = 'noarms', DESC = 'Removes your arms'},
+    {NAME = 'nolegs', DESC = 'Removes your arms'},
+    {NAME = 'nolimbs', DESC = 'Removes your limbs'},
+    {NAME = 'naked', DESC = 'Removes your clothing'},
+    {NAME = 'blockhead', DESC = 'Turns your head into a block'},
+    {NAME = 'blockhats', DESC = 'Turns your hats into blocks'},
+    {NAME = 'creeper', DESC = 'Makes you look like a creeper'},
+    {NAME = 'drophats', DESC = 'Drops your hats'},
+    {NAME = 'droptools', DESC = 'Drops your tools'},
+    {NAME = 'spin [speed]', DESC = 'Spins your character'},
+    {NAME = 'unspin', DESC = 'Disables spin'},
+    {NAME = 'spinhats', DESC = 'Spins your characters accessorys'},
+    {NAME = 'unspinhats', DESC = 'Undoes spinhats'},
+    {NAME = '', DESC = ''},
+    {NAME = 'tools', DESC = 'Copies tools from ReplicatedStorage and Lighting'},
+    {NAME = 'notools/removetools', DESC = 'Removes tools from character and backpack'},
+    {NAME = 'grabtools', DESC = 'Automatically get tools that are dropped'},
+    {NAME = 'ungrabtools', DESC = 'Disables grabtools'},
+    {NAME = 'copytools [plr]', DESC = 'Copies a players tools'},
+    {NAME = '', DESC = ''},
+    {NAME = 'addplugin / plugin [name]', DESC = 'Add a plugin via command'},
+    {NAME = 'removeplugin / deleteplugin [name]', DESC = 'Remove a plugin via command'},
+}
+
+local descMap = {}
+for _, entry in pairs(HelpData) do
+    if entry.NAME and entry.NAME ~= '' then
+        local desc = entry.DESC or "No description"
+        for part in string.gmatch(entry.NAME, "[^/]+") do
+            part = part:match("^%s*(.-)%s*$")
+            local firstWord = part:match("^[%w%-]+")
+            if firstWord then
+                descMap[firstWord:lower()] = desc
+            end
+        end
+        local fullName = entry.NAME:match("^%S+")
+        if fullName then
+            descMap[fullName:lower()] = desc
+        end
+    end
+end
+descMap["cmds"] = "Opens the command list GUI"
+descMap["?cmds"] = "Shows this help"
+
+std.inTable = function(tbl, val)
+    if tbl == nil then return false end
+    for _, v in pairs(tbl) do
+        if v == val then return true end
+    end
+    return false
+end
+
+std.out = function(str) print(str) end
+
+std.list = function(tbl)
+    local str = ''
+    for i, v in pairs(tbl) do
+        str = str .. tostring(v)
+        if i ~= #tbl then str = str .. ', ' end
+    end
+    return str
+end
+
+std.endat = function(str, val)
+    local z = str:find(val)
+    if z then
+        return str:sub(0, z - string.len(val)), true
+    else
+        return str, false
+    end
+end
+
+std.first = function(str)
+    return str:sub(1, 1)
+end
+
+isAdmin = function(name)
+    if name == admin then return true
+    elseif std.inTable(admins, name) then return true end
+    return false
+end
+
+local exec = function(str)
+    spawn(function()
+        local script, loaderr = loadstring(str)
+        if not script then error(loaderr) else script() end
+    end)
+end
+
+local findCmd = function(cmd_name)
+    for i, v in pairs(cmds) do
+        if v.NAME:lower() == cmd_name:lower() or std.inTable(v.ALIAS, cmd_name:lower()) then
+            return v
+        end
+    end
+    return nil
+end
+
+local getCmd = function(msg)
+    local cmd, hassplit = std.endat(msg:lower(), split)
+    if hassplit then return {cmd, true} else return {cmd, false} end
+end
+
+local getprfx = function(strn)
+    if strn:sub(1, string.len(cmdprefix)) == cmdprefix then
+        return {'cmd', string.len(cmdprefix) + 1}
+    elseif strn:sub(1, string.len(scriptprefix)) == scriptprefix then
+        return {'exec', string.len(scriptprefix) + 1}
+    end
+    return
+end
+
+local getArgs = function(str)
+    local args = {}
+    local new_arg = nil
+    local hassplit = nil
+    local s = str
+    repeat
+        new_arg, hassplit = std.endat(s:lower(), split)
+        if new_arg ~= '' then
+            args[#args + 1] = new_arg
+            s = s:sub(string.len(new_arg) + string.len(split) + 1)
+        end
+    until hassplit == false
+    return args
+end
+
+local function execCmd(str, plr)
+    local s_cmd = getCmd(str)
+    local cmd = findCmd(s_cmd[1])
+    if cmd == nil then return end
+    local a = str:sub(string.len(s_cmd[1]) + string.len(split) + 1)
+    local args = getArgs(a)
+    pcall(function()
+        cmd.FUNC(args, plr)
+    end)
+end
+
+function do_exec(str, plr)
+    if not isAdmin(plr.Name) then return end
+    str = str:gsub('/e ', '')
+    local t = getprfx(str)
+    if t == nil then return end
+    str = str:sub(t[2])
+    if t[1] == 'exec' then
+        exec(str)
+    elseif t[1] == 'cmd' then
+        execCmd(str, plr)
+    end
+end
+
+function handleHelp(msg, plr)
+    if not isAdmin(plr.Name) then return end
+    local cmd = msg:match("^%S+")
+    if cmd then
+        cmd = cmd:lower()
+        local desc = descMap[cmd]
+        if desc then
+            Notify("Command: " .. cmd .. "\n" .. desc)
+        else
+            Notify("No description found for: " .. cmd)
+        end
+    end
+end
+
+function addcmd(name, alias, func, plgn)
+    cmds[#cmds + 1] = {
+        NAME = name,
+        ALIAS = alias or {},
+        FUNC = func,
+        PLUGIN = plgn
+    }
+end
+
+local PARENT = game:GetService("CoreGui")
+
+function splitString(str, delim)
+    if delim == nil then delim = "," end
+    local broken = {}
+    for w in string.gmatch(str, "[^" .. delim .. "]+") do
+        table.insert(broken, w)
+    end
+    return broken
+end
+
+function isNumber(str)
+    return tonumber(str) ~= nil
+end
+
+function FindInTable(Table, Name)
+    for _, v in pairs(Table) do
+        if v == Name then return true end
+    end
+    return false
+end
+
+function getstring(begin)
+    begin = begin or 1
+    local start = begin - 1
+    local AA = ''
+    for i = start + 1, #cargs do
+        if AA ~= '' then AA = AA .. ' ' .. cargs[i] else AA = cargs[i] end
+    end
+    return AA
+end
+
+function tools(plr)
+    if plr.Backpack:FindFirstChildOfClass('Tool') or plr.Character:FindFirstChildOfClass('Tool') then
+        return true
+    end
+end
+
+function r15(plr)
+    if plr.Character and plr.Character:FindFirstChildOfClass('Humanoid') then
+        return plr.Character:FindFirstChildOfClass('Humanoid').RigType == Enum.HumanoidRigType.R15
+    end
+    return false
+end
+
+function toClipboard(String)
+    if not pcall(function()
+        local CB = setclipboard or Clipboard.set
+        CB(String)
+        Notify('Copied to clipboard')
+    end) then
+        Notify("Your exploit doesn't have the ability to use the clipboard")
+    end
+end
+
+local SpecialPlayerCases = {
+    ["all"] = function(speaker) return gPlayers:GetPlayers() end,
+    ["others"] = function(speaker)
+        local plrs = {}
+        for _, v in pairs(gPlayers:GetPlayers()) do
+            if v ~= speaker then table.insert(plrs, v) end
+        end
+        return plrs
+    end,
+    ["me"] = function(speaker) return { speaker } end,
+    ["#(%d+)"] = function(speaker, args, currentList)
+        local returns = {}
+        local randAmount = tonumber(args[1])
+        local players = { unpack(currentList) }
+        for i = 1, randAmount do
+            if #players == 0 then break end
+            local randIndex = math.random(1, #players)
+            table.insert(returns, players[randIndex])
+            table.remove(players, randIndex)
+        end
+        return returns
+    end,
+    ["random"] = function(speaker, args, currentList)
+        return { currentList[math.random(1, #currentList)] }
+    end,
+    ["%%(.+)"] = function(speaker, args)
+        local returns = {}
+        local team = args[1]
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.Team and string.sub(string.lower(plr.Team.Name), 1, #team) == string.lower(team) then
+                table.insert(returns, plr)
+            end
+        end
+        return returns
+    end,
+    ["allies"] = function(speaker)
+        local returns = {}
+        local team = speaker.Team
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.Team == team then table.insert(returns, plr) end
+        end
+        return returns
+    end,
+    ["enemies"] = function(speaker)
+        local returns = {}
+        local team = speaker.Team
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.Team ~= team then table.insert(returns, plr) end
+        end
+        return returns
+    end,
+    ["friends"] = function(speaker)
+        local returns = {}
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr:IsFriendsWith(speaker.UserId) and plr ~= speaker then
+                table.insert(returns, plr)
+            end
+        end
+        return returns
+    end,
+    ["nonfriends"] = function(speaker)
+        local returns = {}
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if not plr:IsFriendsWith(speaker.UserId) and plr ~= speaker then
+                table.insert(returns, plr)
+            end
+        end
+        return returns
+    end,
+    ["guests"] = function()
+        local returns = {}
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.Guest then table.insert(returns, plr) end
+        end
+        return returns
+    end,
+    ["bacons"] = function()
+        local returns = {}
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.Character and (plr.Character:FindFirstChild('Pal Hair') or plr.Character:FindFirstChild('Kate Hair')) then
+                table.insert(returns, plr)
+            end
+        end
+        return returns
+    end,
+    ["age(%d+)"] = function(speaker, args)
+        local returns = {}
+        local age = tonumber(args[1])
+        if not age then return end
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.AccountAge <= age then table.insert(returns, plr) end
+        end
+        return returns
+    end,
+    ["rad(%d+)"] = function(speaker, args)
+        local returns = {}
+        local radius = tonumber(args[1])
+        local speakerChar = speaker.Character
+        if not speakerChar or not speakerChar:FindFirstChild("HumanoidRootPart") then return end
+        for _, plr in pairs(gPlayers:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local mag = (plr.Character.HumanoidRootPart.Position - speakerChar.HumanoidRootPart.Position).magnitude
+                if mag <= radius then table.insert(returns, plr) end
+            end
+        end
+        return returns
+    end
+}
+
+local function toTokens(str)
+    local tokens = {}
+    for op, name in string.gmatch(str, "([+-])([^+-]+)") do
+        table.insert(tokens, { Operator = op, Name = name })
+    end
+    return tokens
+end
+
+local function onlyIncludeInTable(tab, matches)
+    local matchTable = {}
+    local resultTable = {}
+    for _, v in pairs(matches) do matchTable[v.Name] = true end
+    for _, v in pairs(tab) do if matchTable[v.Name] then table.insert(resultTable, v) end end
+    return resultTable
+end
+
+local function removeTableMatches(tab, matches)
+    local matchTable = {}
+    local resultTable = {}
+    for _, v in pairs(matches) do matchTable[v.Name] = true end
+    for _, v in pairs(tab) do if not matchTable[v.Name] then table.insert(resultTable, v) end end
+    return resultTable
+end
+
+local function getPlayersByName(name)
+    local found = {}
+    for _, v in pairs(gPlayers:GetPlayers()) do
+        if string.sub(string.lower(v.Name), 1, #name) == string.lower(name) then
+            table.insert(found, v)
+        end
+    end
+    return found
+end
+
+function getPlayer(list, speaker)
+    if list == nil then return { speaker.Name } end
+    local nameList = splitString(list, ",")
+    local foundList = {}
+    for _, name in pairs(nameList) do
+        if string.sub(name, 1, 1) ~= "+" and string.sub(name, 1, 1) ~= "-" then
+            name = "+" .. name
+        end
+        local tokens = toTokens(name)
+        local initialPlayers = gPlayers:GetPlayers()
+        for _, tok in pairs(tokens) do
+            local foundCase = false
+            for regex, case in pairs(SpecialPlayerCases) do
+                local matches = { string.match(tok.Name, "^" .. regex .. "$") }
+                if #matches > 0 then
+                    foundCase = true
+                    local result = case(speaker, matches, initialPlayers)
+                    if tok.Operator == "+" then
+                        local keep = {}
+                        for _, p in pairs(initialPlayers) do
+                            for _, r in pairs(result) do
+                                if p == r then table.insert(keep, p) break end
+                            end
+                        end
+                        initialPlayers = keep
+                    else
+                        for _, rem in pairs(result) do
+                            for i = #initialPlayers, 1, -1 do
+                                if initialPlayers[i] == rem then table.remove(initialPlayers, i) end
+                            end
+                        end
+                    end
+                end
+            end
+            if not foundCase then
+                local matches = getPlayersByName(tok.Name)
+                if tok.Operator == "+" then
+                    local keep = {}
+                    for _, p in pairs(initialPlayers) do
+                        for _, m in pairs(matches) do
+                            if p == m then table.insert(keep, p) break end
+                        end
+                    end
+                    initialPlayers = keep
+                else
+                    for _, rem in pairs(matches) do
+                        for i = #initialPlayers, 1, -1 do
+                            if initialPlayers[i] == rem then table.remove(initialPlayers, i) end
+                        end
+                    end
+                end
+            end
+        end
+        for _, p in pairs(initialPlayers) do
+            table.insert(foundList, p)
+        end
+    end
+    local names = {}
+    for _, p in pairs(foundList) do
+        table.insert(names, p.Name)
+    end
+    return names
+end
+
+FLYING = false
+iyflyspeed = 1
+vehicleflyspeed = 1
+Floating = false
+FloatingFunc = nil
+Clip = true
+Noclipping = nil
+ESPenabled = false
+CHMSenabled = false
+bangplr = nil
+spinenabled = false
+spinning = nil
+spamming = false
+spamspeed = 1
+pmspamming = {}
+lastBreakTime = 0
+cargs = {}
+spawnpoint = false
+spawnpos = nil
+refreshCmd = false
+lastDeath = nil
+customAlias = {}
+aliases = {}
+WayPoints = {}
+pWayPoints = {}
+AllWaypoints = nil
+binds = {}
+spawnCmds = {}
+PluginsTable = {}
+gtools = false
+headsitting = false
+loopgoto = nil
+transparent = false
+oofing = false
+bringT = {}
+viewHumanoid = nil
+animTrack = nil
+Spasm = nil
+SpasmAnim = nil
+bangAnim = nil
+bang = nil
+TouchingFloor = nil
+cs = 0.5
+cam1, cam2, cam3 = 0, 0, 0
+k1, k2, k3, k4, k5, k6 = false, false, false, false, false, false
+
+function sFLY(vfly)
+    repeat wait() until Player.Character and Player.Character:FindFirstChild('HumanoidRootPart')
+    repeat wait() until Player:GetMouse()
+    local T = Player.Character.HumanoidRootPart
+    local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+    local lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+    local SPEED = 0
+    local function FLY()
+        FLYING = true
+        local BG = Instance.new('BodyGyro', T)
+        local BV = Instance.new('BodyVelocity', T)
+        BG.P = 9e4
+        BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        BG.cframe = T.CFrame
+        BV.velocity = Vector3.new(0, 0, 0)
+        BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        spawn(function()
+            repeat
+                wait()
+                if not vfly then
+                    Player.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
+                end
+                if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+                    SPEED = 50
+                elseif not (CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0) and SPEED ~= 0 then
+                    SPEED = 0
+                end
+                if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 or (CONTROL.Q + CONTROL.E) ~= 0 then
+                    BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) +
+                        ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+                        workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+                    lCONTROL = {F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R}
+                elseif (CONTROL.L + CONTROL.R) == 0 and (CONTROL.F + CONTROL.B) == 0 and (CONTROL.Q + CONTROL.E) == 0 and SPEED ~= 0 then
+                    BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) +
+                        ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) -
+                        workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+                else
+                    BV.velocity = Vector3.new(0, 0, 0)
+                end
+                BG.cframe = workspace.CurrentCamera.CoordinateFrame
+            until not FLYING
+            BG:Destroy()
+            BV:Destroy()
+            Player.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+        end)
+    end
+    local mouse = Player:GetMouse()
+    mouse.KeyDown:Connect(function(KEY)
+        KEY = KEY:lower()
+        if KEY == 'w' then CONTROL.F = vfly and 1 or iyflyspeed
+        elseif KEY == 's' then CONTROL.B = vfly and -1 or -iyflyspeed
+        elseif KEY == 'a' then CONTROL.L = vfly and -1 or -iyflyspeed
+        elseif KEY == 'd' then CONTROL.R = vfly and 1 or iyflyspeed
+        elseif KEY == 'e' then CONTROL.Q = vfly and 2 or iyflyspeed * 2
+        elseif KEY == 'q' then CONTROL.E = vfly and -2 or -iyflyspeed * 2
+        end
+    end)
+    mouse.KeyUp:Connect(function(KEY)
+        KEY = KEY:lower()
+        if KEY == 'w' then CONTROL.F = 0
+        elseif KEY == 's' then CONTROL.B = 0
+        elseif KEY == 'a' then CONTROL.L = 0
+        elseif KEY == 'd' then CONTROL.R = 0
+        elseif KEY == 'e' then CONTROL.Q = 0
+        elseif KEY == 'q' then CONTROL.E = 0
+        end
+    end)
+    FLY()
+end
+
+function NOFLY()
+    FLYING = false
+    if Player.Character then
+        local hum = Player.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum.PlatformStand = false end
+    end
+end
+
+function respawn(plr)
+    if r15(plr) then
+        plr.Character:FindFirstChildOfClass('Humanoid').Health = 0
+        wait(0.1)
+        plr.Character.Head.CFrame = CFrame.new(1000000, 0, 1000000)
+        plr.Character.HumanoidRootPart:Destroy()
+    else
+        plr.Character:Destroy()
+        local M = Instance.new('Model', workspace)
+        M.Name = 'respawn_iy'
+        Instance.new('Humanoid', M)
+        local T = Instance.new('Part', M)
+        T.Name = 'Torso'
+        T.CanCollide = false
+        T.Transparency = 1
+        plr.Character = M
+    end
+end
+
+function refresh(plr)
+    spawn(function()
+        refreshCmd = true
+        local rpos = plr.Character.HumanoidRootPart.Position
+        wait()
+        respawn(plr)
+        wait()
+        repeat wait() until plr.Character and plr.Character:FindFirstChild('HumanoidRootPart')
+        wait(.1)
+        plr.Character:MoveTo(rpos)
+        wait()
+        refreshCmd = false
+    end)
+end
+
+function onDied()
+    spawn(function()
+        if pcall(function() Player.Character:FindFirstChildOfClass('Humanoid') end) and Player.Character:FindFirstChildOfClass('Humanoid') then
+            Player.Character:FindFirstChildOfClass('Humanoid').Died:Connect(function()
+                if Player.Character:FindFirstChild("HumanoidRootPart") then
+                    lastDeath = Player.Character:FindFirstChild("HumanoidRootPart").CFrame
+                end
+            end)
+        else
+            wait(2)
+            onDied()
+        end
+    end)
+end
+
+function ESP(plr)
+    spawn(function()
+        for _, v in pairs(PARENT:GetChildren()) do
+            if v.Name == plr.Name .. '_ESP' then v:Destroy() end
+        end
+        wait()
+        if plr.Character and plr.Name ~= Player.Name and not PARENT:FindFirstChild(plr.Name .. '_ESP') then
+            local ESPholder = Instance.new("Folder", PARENT)
+            ESPholder.Name = plr.Name .. '_ESP'
+            for _, n in pairs(plr.Character:GetChildren()) do
+                if n:IsA("BasePart") then
+                    local a = Instance.new("BoxHandleAdornment", ESPholder)
+                    a.Name = plr.Name
+                    a.Adornee = n
+                    a.AlwaysOnTop = true
+                    a.ZIndex = 0
+                    a.Size = n.Size
+                    a.Transparency = 0.7
+                    if plr.TeamColor == Player.TeamColor then
+                        a.Color = BrickColor.new("Lime green")
+                    else
+                        a.Color = BrickColor.new("Really red")
+                    end
+                end
+            end
+            if plr.Character and plr.Character:FindFirstChild('Head') then
+                local BillboardGui = Instance.new("BillboardGui", ESPholder)
+                local TextLabel = Instance.new("TextLabel")
+                BillboardGui.Adornee = plr.Character.Head
+                BillboardGui.Name = plr.Name
+                BillboardGui.Size = UDim2.new(0, 100, 0, 150)
+                BillboardGui.StudsOffset = Vector3.new(0, 1, 0)
+                BillboardGui.AlwaysOnTop = true
+                TextLabel.Parent = BillboardGui
+                TextLabel.BackgroundTransparency = 1
+                TextLabel.Position = UDim2.new(0, 0, 0, -50)
+                TextLabel.Size = UDim2.new(0, 100, 0, 100)
+                TextLabel.Font = Enum.Font.SourceSansSemibold
+                TextLabel.TextSize = 20
+                TextLabel.TextColor3 = Color3.new(1, 1, 1)
+                TextLabel.TextStrokeTransparency = 0
+                TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+                plr.CharacterAdded:Connect(function()
+                    if ESPenabled then
+                        if espLoopFunc then espLoopFunc:Disconnect() end
+                        ESPholder:Destroy()
+                        repeat wait() until plr.Character and plr.Character:FindFirstChild('HumanoidRootPart')
+                        ESP(plr)
+                    end
+                end)
+                local function espLoop()
+                    if PARENT:FindFirstChild(plr.Name .. '_ESP') and plr.Character and plr.Character:FindFirstChild('HumanoidRootPart') and Player.Character then
+                        local pos = math.floor((Player.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).magnitude)
+                        local health = plr.Character:FindFirstChildOfClass('Humanoid') and plr.Character:FindFirstChildOfClass('Humanoid').Health or 0
+                        TextLabel.Text = 'Name: ' .. plr.Name .. ' | Health: ' .. math.round(health, 1) .. ' | Studs: ' .. pos
+                    else
+                        if espLoopFunc then espLoopFunc:Disconnect() end
+                    end
+                end
+                espLoopFunc = game:GetService("RunService").RenderStepped:Connect(espLoop)
+            end
+        end
+    end)
+end
+
+function CHMS(plr)
+    spawn(function()
+        for _, v in pairs(PARENT:GetChildren()) do
+            if v.Name == plr.Name .. '_CHMS' then v:Destroy() end
+        end
+        wait()
+        if plr.Character and plr.Name ~= Player.Name and not PARENT:FindFirstChild(plr.Name .. '_CHMS') then
+            local ESPholder = Instance.new("Folder", PARENT)
+            ESPholder.Name = plr.Name .. '_CHMS'
+            for _, n in pairs(plr.Character:GetChildren()) do
+                if n:IsA("BasePart") then
+                    local a = Instance.new("BoxHandleAdornment", ESPholder)
+                    a.Name = plr.Name
+                    a.Adornee = n
+                    a.AlwaysOnTop = true
+                    a.ZIndex = 0
+                    a.Size = n.Size
+                    a.Transparency = 0.7
+                    if plr.TeamColor == Player.TeamColor then
+                        a.Color = BrickColor.new("Lime green")
+                    else
+                        a.Color = BrickColor.new("Really red")
+                    end
+                end
+            end
+            plr.CharacterAdded:Connect(function()
+                if CHMSenabled then
+                    ESPholder:Destroy()
+                    repeat wait() until plr.Character and plr.Character:FindFirstChild('HumanoidRootPart')
+                    CHMS(plr)
+                end
+            end)
+        end
+    end)
+end
+
+function Locate(plr)
+    spawn(function()
+        for _, v in pairs(PARENT:GetChildren()) do
+            if v.Name == plr.Name .. '_LC' then v:Destroy() end
+        end
+        wait()
+        if plr.Character and plr.Name ~= Player.Name and not PARENT:FindFirstChild(plr.Name .. '_LC') then
+            local ESPholder = Instance.new("Folder", PARENT)
+            ESPholder.Name = plr.Name .. '_LC'
+            for _, n in pairs(plr.Character:GetChildren()) do
+                if n:IsA("BasePart") then
+                    local a = Instance.new("BoxHandleAdornment", ESPholder)
+                    a.Name = plr.Name
+                    a.Adornee = n
+                    a.AlwaysOnTop = true
+                    a.ZIndex = 0
+                    a.Size = n.Size
+                    a.Transparency = 0.7
+                    if plr.TeamColor == Player.TeamColor then
+                        a.Color = BrickColor.new("Lime green")
+                    else
+                        a.Color = BrickColor.new("Really red")
+                    end
+                end
+            end
+            if plr.Character and plr.Character:FindFirstChild('Head') then
+                local BillboardGui = Instance.new("BillboardGui", ESPholder)
+                local TextLabel = Instance.new("TextLabel")
+                BillboardGui.Adornee = plr.Character.Head
+                BillboardGui.Name = plr.Name
+                BillboardGui.Size = UDim2.new(0, 100, 0, 150)
+                BillboardGui.StudsOffset = Vector3.new(0, 1, 0)
+                BillboardGui.AlwaysOnTop = true
+                TextLabel.Parent = BillboardGui
+                TextLabel.BackgroundTransparency = 1
+                TextLabel.Position = UDim2.new(0, 0, 0, -50)
+                TextLabel.Size = UDim2.new(0, 100, 0, 100)
+                TextLabel.Font = Enum.Font.SourceSansSemibold
+                TextLabel.TextSize = 20
+                TextLabel.TextColor3 = Color3.new(1, 1, 1)
+                TextLabel.TextStrokeTransparency = 0
+                TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+                plr.CharacterAdded:Connect(function()
+                    if ESPholder and ESPholder.Parent then
+                        if lcLoopFunc then lcLoopFunc:Disconnect() end
+                        ESPholder:Destroy()
+                        repeat wait() until plr.Character and plr.Character:FindFirstChild('HumanoidRootPart')
+                        Locate(plr)
+                    end
+                end)
+                local function lcLoop()
+                    if PARENT:FindFirstChild(plr.Name .. '_LC') and plr.Character and plr.Character:FindFirstChild('HumanoidRootPart') and Player.Character then
+                        local pos = math.floor((Player.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).magnitude)
+                        local health = plr.Character:FindFirstChildOfClass('Humanoid') and plr.Character:FindFirstChildOfClass('Humanoid').Health or 0
+                        TextLabel.Text = 'Name: ' .. plr.Name .. ' | Health: ' .. math.round(health, 1) .. ' | Studs: ' .. pos
+                    else
+                        if lcLoopFunc then lcLoopFunc:Disconnect() end
+                    end
+                end
+                lcLoopFunc = game:GetService("RunService").RenderStepped:Connect(lcLoop)
+            end
+        end
+    end)
+end
+
+addcmd('breakloops', {'break'}, function(args, speaker)
+    lastBreakTime = tick()
+end)
+
+addcmd('rejoin', {'rj'}, function(args, speaker)
+    game:GetService('TeleportService'):Teleport(game.PlaceId)
+end)
+
+addcmd('exit', {}, function(args, speaker)
+    game:Shutdown()
+end)
+
+addcmd('removecmd', {'deletecmd'}, function(args, speaker)
+    local cmd = args[1]
+    if cmd then
+        for i = #cmds, 1, -1 do
+            if cmds[i].NAME == cmd or std.inTable(cmds[i].ALIAS, cmd) then
+                table.remove(cmds, i)
+            end
+        end
+        Notify("Removed command: " .. cmd)
+    end
+end)
+
+addcmd('chatlogs', {'logs'}, function(args, speaker)
+    Notify("Chat logs are not available in this standalone version.")
+end)
+
+addcmd('serverinfo', {'info', 'sinfo'}, function(args, speaker)
+    local info = string.format(
+        "Place: %s\nPlace ID: %d\nPlayer ID: %d\nPlayers: %d/%d\nRun Time: %.0f seconds",
+        game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+        game.PlaceId, Player.UserId,
+        #gPlayers:GetPlayers(), gPlayers.MaxPlayers,
+        workspace.DistributedGameTime
+    )
+    Notify(info)
+end)
+
+addcmd('explorer', {'dex'}, function(args, speaker)
+    loadstring(game:GetObjects("rbxassetid://418957341")[1].Source)()
+end)
+
+addcmd('enable', {}, function(args, speaker)
+    local gui = args[1] and args[1]:lower()
+    if gui == 'inventory' or gui == 'backpack' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled('Backpack', true)
+    elseif gui == 'playerlist' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled('PlayerList', true)
+    elseif gui == 'chat' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled('Chat', true)
+    elseif gui == 'all' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+    end
+end)
+
+addcmd('disable', {}, function(args, speaker)
+    local gui = args[1] and args[1]:lower()
+    if gui == 'inventory' or gui == 'backpack' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled('Backpack', false)
+    elseif gui == 'playerlist' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled('PlayerList', false)
+    elseif gui == 'chat' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled('Chat', false)
+    elseif gui == 'all' then
+        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+    end
+end)
+
+addcmd('addalias', {}, function(args, speaker)
+    if #args < 2 then return end
+    local cmd = string.lower(args[1])
+    local alias = string.lower(args[2])
+    for _, v in pairs(cmds) do
+        if v.NAME:lower() == cmd or std.inTable(v.ALIAS, cmd) then
+            customAlias[alias] = v
+            table.insert(aliases, { CMD = cmd, ALIAS = alias })
+            Notify("Alias added: " .. alias .. " -> " .. cmd)
+            break
+        end
+    end
+end)
+
+addcmd('removealias', {}, function(args, speaker)
+    if #args < 1 then return end
+    local alias = string.lower(args[1])
+    if customAlias[alias] then
+        customAlias[alias] = nil
+        for i = #aliases, 1, -1 do
+            if aliases[i].ALIAS == alias then table.remove(aliases, i) end
+        end
+        Notify("Alias removed: " .. alias)
+    end
+end)
+
+addcmd('clraliases', {}, function(args, speaker)
+    customAlias = {}
+    aliases = {}
+    Notify("All aliases cleared")
+end)
+
+addcmd('noclip', {}, function(args, speaker)
+    Clip = false
+    local function loop()
+        if not Clip and Player.Character then
+            for _, child in pairs(Player.Character:GetDescendants()) do
+                if child:IsA("BasePart") and child.CanCollide then
+                    child.CanCollide = false
+                end
+            end
+        end
+    end
+    if Noclipping then Noclipping:Disconnect() end
+    Noclipping = game:GetService('RunService').Stepped:Connect(loop)
+    if args[1] ~= 'nonotify' then Notify("Noclip enabled") end
+end)
+
+addcmd('unnoclip', {'clip'}, function(args, speaker)
+    Clip = true
+    if Noclipping then
+        Noclipping:Disconnect()
+        Noclipping = nil
+    end
+    if args[1] ~= 'nonotify' then Notify("Noclip disabled") end
+end)
+
+addcmd('fly', {}, function(args, speaker)
+    NOFLY()
+    wait()
+    sFLY()
+end)
+
+addcmd('flyspeed', {'flysp'}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        iyflyspeed = tonumber(args[1])
+        Notify("Fly speed set to " .. iyflyspeed)
+    end
+end)
+
+addcmd('unfly', {'nofly'}, function(args, speaker)
+    NOFLY()
+end)
+
+addcmd('vehiclefly', {'vfly'}, function(args, speaker)
+    NOFLY()
+    wait()
+    sFLY(true)
+end)
+
+addcmd('unvehiclefly', {'unvfly'}, function(args, speaker)
+    NOFLY()
+end)
+
+addcmd('vehicleflyspeed', {'vflyspeed'}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        vehicleflyspeed = tonumber(args[1])
+        Notify("Vehicle fly speed set to " .. vehicleflyspeed)
+    end
+end)
+
+addcmd('float', {'platform'}, function(args, speaker)
+    Floating = true
+    local pchar = Player.Character
+    if pchar and not pchar:FindFirstChild("Float") then
+        local Float = Instance.new('Part', pchar)
+        Float.Name = 'Float'
+        Float.Transparency = 1
+        Float.Size = Vector3.new(6, 1, 6)
+        Float.Anchored = true
+        Float.CFrame = pchar.HumanoidRootPart.CFrame * CFrame.new(0, -3.5, 0)
+        FloatingFunc = game:GetService('RunService').RenderStepped:Connect(function()
+            if pchar:FindFirstChild("Float") then
+                Float.CFrame = pchar.HumanoidRootPart.CFrame * CFrame.new(0, -3.5, 0)
+            else
+                FloatingFunc:Disconnect()
+            end
+        end)
+        Notify("Float enabled")
+    end
+end)
+
+addcmd('unfloat', {'nofloat', 'noplatform'}, function(args, speaker)
+    Floating = false
+    local pchar = Player.Character
+    if pchar and pchar:FindFirstChild("Float") then
+        pchar.Float:Destroy()
+    end
+    if FloatingFunc then FloatingFunc:Disconnect() end
+    Notify("Float disabled")
+end)
+
+addcmd('spos', {'setwaypoint', 'savepos'}, function(args, speaker)
+    local name = getstring(1)
+    if name and name ~= '' then
+        local torso = speaker.Character and speaker.Character:FindFirstChild("HumanoidRootPart")
+        if torso then
+            local pos = torso.Position
+            table.insert(WayPoints, { NAME = name, COORD = { math.floor(pos.X), math.floor(pos.Y), math.floor(pos.Z) }, GAME = game.PlaceId })
+            Notify("Waypoint created: " .. name)
+        end
+    end
+end)
+
+addcmd('setwaypointpos', {'setpos'}, function(args, speaker)
+    local name = getstring(1)
+    if name and args[2] and args[3] and args[4] then
+        local x, y, z = tonumber(args[2]), tonumber(args[3]), tonumber(args[4])
+        if x and y and z then
+            table.insert(WayPoints, { NAME = name, COORD = { x, y, z }, GAME = game.PlaceId })
+            Notify("Waypoint created: " .. name)
+        end
+    end
+end)
+
+addcmd('dpos', {'deletewaypoint', 'deletepos'}, function(args, speaker)
+    local name = getstring(1)
+    for i = #WayPoints, 1, -1 do
+        if WayPoints[i].NAME:lower() == name:lower() then
+            table.remove(WayPoints, i)
+            Notify("Deleted waypoint: " .. name)
+        end
+    end
+    for i = #pWayPoints, 1, -1 do
+        if pWayPoints[i].NAME:lower() == name:lower() then
+            table.remove(pWayPoints, i)
+        end
+    end
+end)
+
+addcmd('lpos', {'waypoint', 'loadpos'}, function(args, speaker)
+    local name = getstring(1)
+    if Player.Character then
+        for _, wp in pairs(WayPoints) do
+            if wp.NAME:lower() == name:lower() then
+                Player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(wp.COORD))
+                return
+            end
+        end
+        for _, wp in pairs(pWayPoints) do
+            if wp.NAME:lower() == name:lower() and wp.COORD[1] then
+                Player.Character.HumanoidRootPart.CFrame = CFrame.new(wp.COORD[1].Position)
+                return
+            end
+        end
+        Notify("Waypoint not found")
+    end
+end)
+
+addcmd('clearpos', {'cpos', 'clearwaypoints'}, function(args, speaker)
+    WayPoints = {}
+    pWayPoints = {}
+    Notify("All waypoints cleared")
+end)
+
+addcmd('spam', {}, function(args, speaker)
+    spamming = true
+    local spamstring = getstring(1)
+    spawn(function()
+        repeat
+            wait(spamspeed)
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(spamstring, "All")
+        until not spamming
+    end)
+end)
+
+addcmd('unspam', {'nospam'}, function(args, speaker)
+    spamming = false
+end)
+
+addcmd('pmspam', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        spawn(function()
+            if FindInTable(pmspamming, name) then return end
+            table.insert(pmspamming, name)
+            local pmspamstring = getstring(2)
+            repeat
+                wait(spamspeed)
+                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("/w " .. name .. " " .. pmspamstring, "All")
+            until not FindInTable(pmspamming, name)
+            for i = #pmspamming, 1, -1 do
+                if pmspamming[i] == name then table.remove(pmspamming, i) end
+            end
+        end)
+    end
+end)
+
+addcmd('unpmspam', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        for i = #pmspamming, 1, -1 do
+            if pmspamming[i] == name then table.remove(pmspamming, i) end
+        end
+    end
+end)
+
+addcmd('spamspeed', {}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        spamspeed = tonumber(args[1])
+        Notify("Spam speed set to " .. spamspeed)
+    end
+end)
+
+addcmd('esp', {}, function(args, speaker)
+    if not CHMSenabled then
+        ESPenabled = true
+        for _, v in pairs(gPlayers:GetPlayers()) do
+            if v ~= Player then ESP(v) end
+        end
+        Notify("ESP enabled")
+    else
+        Notify("Disable chams first (nochams)")
+    end
+end)
+
+addcmd('noesp', {'unesp'}, function(args, speaker)
+    ESPenabled = false
+    for _, v in pairs(gPlayers:GetPlayers()) do
+        local folder = PARENT:FindFirstChild(v.Name .. '_ESP')
+        if folder then folder:Destroy() end
+    end
+    Notify("ESP disabled")
+end)
+
+addcmd('chams', {}, function(args, speaker)
+    if not ESPenabled then
+        CHMSenabled = true
+        for _, v in pairs(gPlayers:GetPlayers()) do
+            if v ~= Player then CHMS(v) end
+        end
+        Notify("Chams enabled")
+    else
+        Notify("Disable ESP first (noesp)")
+    end
+end)
+
+addcmd('nochams', {'unchams'}, function(args, speaker)
+    CHMSenabled = false
+    for _, v in pairs(gPlayers:GetPlayers()) do
+        local folder = PARENT:FindFirstChild(v.Name .. '_CHMS')
+        if folder then folder:Destroy() end
+    end
+    Notify("Chams disabled")
+end)
+
+addcmd('locate', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr then Locate(plr) end
+    end
+end)
+
+addcmd('unlocate', {'nolocate'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local folder = PARENT:FindFirstChild(name .. '_LC')
+        if folder then folder:Destroy() end
+    end
+end)
+
+addcmd('spectate', {'view'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr and plr.Character then
+            if viewHumanoid then viewHumanoid:Disconnect() end
+            workspace.CurrentCamera.CameraSubject = plr.Character
+            Notify("Viewing " .. name)
+            viewHumanoid = plr.Character:FindFirstChildOfClass('Humanoid').Died:Connect(function()
+                workspace.CurrentCamera.CameraSubject = Player.Character
+                Notify("View turned off (player died)")
+            end)
+        end
+    end
+end)
+
+addcmd('unspectate', {'unview'}, function(args, speaker)
+    workspace.CurrentCamera.CameraSubject = Player.Character
+    if viewHumanoid then viewHumanoid:Disconnect() end
+    Notify("View turned off")
+end)
+
+function movecam()
+    local fc = Player.Character and Player.Character:FindFirstChild('xFC')
+    if fc then
+        local fp = fc.Position
+        fc.CFrame = CFrame.new(Vector3.new(fp.X, fp.Y + cam3, fp.Z), workspace.CurrentCamera.CFrame.p) * CFrame.new(cam2, 0, cam1)
+        Player.Character.Head.Anchored = true
+    end
+end
+
+local function kp1(inputObject, gameProcessedEvent)
+    if not gameProcessedEvent and Player.Character and Player.Character:FindFirstChild('xFC') then
+        if inputObject.KeyCode == Enum.KeyCode.W or inputObject.KeyCode == Enum.KeyCode.Up then
+            k1 = true; cam1 = cs
+        elseif inputObject.KeyCode == Enum.KeyCode.S or inputObject.KeyCode == Enum.KeyCode.Down then
+            k2 = true; cam1 = -cs
+        elseif inputObject.KeyCode == Enum.KeyCode.A or inputObject.KeyCode == Enum.KeyCode.Left then
+            k3 = true; cam2 = cs
+        elseif inputObject.KeyCode == Enum.KeyCode.D or inputObject.KeyCode == Enum.KeyCode.Right then
+            k4 = true; cam2 = -cs
+        elseif inputObject.KeyCode == Enum.KeyCode.E or inputObject.KeyCode == Enum.KeyCode.Space then
+            k5 = true; cam3 = cs
+        elseif inputObject.KeyCode == Enum.KeyCode.Q or inputObject.KeyCode == Enum.KeyCode.LeftControl then
+            k6 = true; cam3 = -cs
+        end
+    end
+end
+
+local function kp2(inputObject, gameProcessedEvent)
+    if not gameProcessedEvent and Player.Character and Player.Character:FindFirstChild('xFC') then
+        if inputObject.KeyCode == Enum.KeyCode.W or inputObject.KeyCode == Enum.KeyCode.Up then
+            k1 = false; if not k2 then cam1 = 0 end
+        elseif inputObject.KeyCode == Enum.KeyCode.S or inputObject.KeyCode == Enum.KeyCode.Down then
+            k2 = false; if not k1 then cam1 = 0 end
+        elseif inputObject.KeyCode == Enum.KeyCode.A or inputObject.KeyCode == Enum.KeyCode.Left then
+            k3 = false; if not k4 then cam2 = 0 end
+        elseif inputObject.KeyCode == Enum.KeyCode.D or inputObject.KeyCode == Enum.KeyCode.Right then
+            k4 = false; if not k3 then cam2 = 0 end
+        elseif inputObject.KeyCode == Enum.KeyCode.E or inputObject.KeyCode == Enum.KeyCode.Space then
+            k5 = false; if not k6 then cam3 = 0 end
+        elseif inputObject.KeyCode == Enum.KeyCode.Q or inputObject.KeyCode == Enum.KeyCode.LeftControl then
+            k6 = false; if not k5 then cam3 = 0 end
+        end
+    end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(kp1)
+game:GetService("UserInputService").InputEnded:Connect(kp2)
+
+addcmd('freecam', {'fc'}, function(args, speaker)
+    if not Player.Character:FindFirstChild('xFC') then
+        local fc = Instance.new('Part', Player.Character)
+        fc.CanCollide = false
+        fc.Anchored = true
+        fc.Transparency = 1
+        fc.Size = Vector3.new(1, 1, 1)
+        fc.Name = 'xFC'
+        fc.CFrame = Player.Character.Head.CFrame
+        local cam = workspace.CurrentCamera
+        cam.CameraSubject = fc
+        cam.CameraType = 'Custom'
+        game:GetService('RunService').RenderStepped:Connect(movecam)
+        Notify("Freecam enabled")
+    end
+end)
+
+addcmd('unfreecam', {'nofreecam', 'unfc'}, function(args, speaker)
+    if Player.Character:FindFirstChild('xFC') then
+        Player.Character:FindFirstChild('xFC'):Destroy()
+        local cam = workspace.CurrentCamera
+        cam.CameraSubject = Player.Character.Humanoid
+        cam.CameraType = 'Custom'
+        Player.Character.Head.Anchored = false
+        Notify("Freecam disabled")
+    end
+end)
+
+addcmd('freecamspeed', {'fcspeed'}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        cs = tonumber(args[1])
+        Notify("Freecam speed set to " .. cs)
+    end
+end)
+
+addcmd('fctp', {'freecamtp'}, function(args, speaker)
+    local fc = Player.Character and Player.Character:FindFirstChild('xFC')
+    if fc then
+        Player.Character.Head.Anchored = false
+        Player.Character.HumanoidRootPart.CFrame = fc.CFrame
+        Player.Character.Head.Anchored = true
+        Notify("Teleported to freecam")
+    else
+        Notify("Enable freecam first")
+    end
+end)
+
+addcmd('firstp', {}, function(args, speaker)
+    Player.CameraMode = "LockFirstPerson"
+end)
+
+addcmd('thirdp', {}, function(args, speaker)
+    Player.CameraMode = "Classic"
+end)
+
+addcmd('maxzoom', {}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        Player.CameraMaxZoomDistance = tonumber(args[1])
+    end
+end)
+
+addcmd('fov', {}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        workspace.CurrentCamera.FieldOfView = tonumber(args[1])
+    else
+        workspace.CurrentCamera.FieldOfView = 70
+    end
+end)
+
+addcmd('fixcam', {}, function(args, speaker)
+    Player.Character.Head.Anchored = false
+    workspace.CurrentCamera:remove()
+    wait(.1)
+    workspace.CurrentCamera.CameraSubject = Player.Character.Humanoid
+    workspace.CurrentCamera.CameraType = "Custom"
+    Player.CameraMinZoomDistance = 0.5
+    Player.CameraMaxZoomDistance = 400
+    Player.CameraMode = "Classic"
+    Notify("Camera fixed")
+end)
+
+addcmd('btools', {}, function(args, speaker)
+    Instance.new("HopperBin", Player.Backpack).BinType = 1
+    Instance.new("HopperBin", Player.Backpack).BinType = 2
+    Instance.new("HopperBin", Player.Backpack).BinType = 3
+    Instance.new("HopperBin", Player.Backpack).BinType = 4
+    Notify("Building tools added")
+end)
+
+addcmd('f3x', {'fex'}, function(args, speaker)
+    loadstring(game:GetObjects("rbxassetid://1059691823")[1].Source)()
+end)
+
+addcmd('delete', {'remove'}, function(args, speaker)
+    local partName = getstring(1)
+    local function dels(instance)
+        for _, v in pairs(instance:GetChildren()) do
+            if v.Name:lower() == partName:lower() then v:Destroy() end
+            dels(v)
+        end
+    end
+    dels(workspace)
+    Notify("Deleted all items named: " .. partName)
+end)
+
+addcmd('deleteclass', {'dc', 'deleteclassname'}, function(args, speaker)
+    local className = getstring(1)
+    local function dels(instance)
+        for _, v in pairs(instance:GetChildren()) do
+            if v.ClassName:lower() == className:lower() then v:Destroy() end
+            dels(v)
+        end
+    end
+    dels(workspace)
+    Notify("Deleted all items with ClassName: " .. className)
+end)
+
+addcmd('lockworkspace', {'lockws'}, function(args, speaker)
+    local function lock(instance)
+        for _, v in pairs(instance:GetChildren()) do
+            if v:IsA("BasePart") then v.Locked = true end
+            lock(v)
+        end
+    end
+    lock(workspace)
+    Notify("Workspace locked")
+end)
+
+addcmd('unlockworkspace', {'unlockws'}, function(args, speaker)
+    local function unlock(instance)
+        for _, v in pairs(instance:GetChildren()) do
+            if v:IsA("BasePart") then v.Locked = false end
+            unlock(v)
+        end
+    end
+    unlock(workspace)
+    Notify("Workspace unlocked")
+end)
+
+addcmd('gotopart', {}, function(args, speaker)
+    local partName = getstring(1)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and v.Name:lower() == partName:lower() then
+            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                Player.Character.HumanoidRootPart.CFrame = v.CFrame
+                wait(0.1)
+            end
+        end
+    end
+end)
+
+addcmd('bringpart', {}, function(args, speaker)
+    local partName = getstring(1)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and v.Name:lower() == partName:lower() then
+            if speaker.Character and speaker.Character:FindFirstChild("HumanoidRootPart") then
+                v.CFrame = speaker.Character.HumanoidRootPart.CFrame
+            end
+        end
+    end
+end)
+
+addcmd('ambient', {}, function(args, speaker)
+    if args[1] and args[2] and args[3] then
+        local r, g, b = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
+        if r and g and b then
+            game:GetService("Lighting").Ambient = Color3.new(r, g, b)
+            game:GetService("Lighting").OutdoorAmbient = Color3.new(r, g, b)
+            Notify("Ambient changed")
+        end
+    end
+end)
+
+addcmd('day', {}, function(args, speaker)
+    game:GetService("Lighting").ClockTime = 14
+end)
+
+addcmd('night', {}, function(args, speaker)
+    game:GetService("Lighting").ClockTime = 0
+end)
+
+addcmd('nofog', {}, function(args, speaker)
+    game:GetService("Lighting").FogEnd = 100000
+end)
+
+addcmd('brightness', {}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        game:GetService("Lighting").Brightness = tonumber(args[1])
+    end
+end)
+
+addcmd('globalshadows', {'gshadows'}, function(args, speaker)
+    game:GetService("Lighting").GlobalShadows = true
+end)
+
+addcmd('noglobalshadows', {'nogshadows'}, function(args, speaker)
+    game:GetService("Lighting").GlobalShadows = false
+end)
+
+local origsettings = {
+    abt = game:GetService("Lighting").Ambient,
+    oabt = game:GetService("Lighting").OutdoorAmbient,
+    brt = game:GetService("Lighting").Brightness,
+    time = game:GetService("Lighting").ClockTime,
+    fe = game:GetService("Lighting").FogEnd,
+    fs = game:GetService("Lighting").FogStart,
+    gs = game:GetService("Lighting").GlobalShadows
+}
+
+addcmd('restorelighting', {'rlighting'}, function(args, speaker)
+    game:GetService("Lighting").Ambient = origsettings.abt
+    game:GetService("Lighting").OutdoorAmbient = origsettings.oabt
+    game:GetService("Lighting").Brightness = origsettings.brt
+    game:GetService("Lighting").ClockTime = origsettings.time
+    game:GetService("Lighting").FogEnd = origsettings.fe
+    game:GetService("Lighting").FogStart = origsettings.fs
+    game:GetService("Lighting").GlobalShadows = origsettings.gs
+    Notify("Lighting restored")
+end)
+
+addcmd('light', {}, function(args, speaker)
+    if speaker.Character and speaker.Character:FindFirstChild("HumanoidRootPart") then
+        local light = Instance.new("PointLight", speaker.Character.HumanoidRootPart)
+        light.Range = 30
+        if args[1] and isNumber(args[1]) then
+            light.Brightness = tonumber(args[1])
+        else
+            light.Brightness = 5
+        end
+        Notify("Light added")
+    end
+end)
+
+addcmd('nolight', {'unlight'}, function(args, speaker)
+    for _, v in pairs(speaker.Character:GetDescendants()) do
+        if v:IsA("PointLight") then v:Destroy() end
+    end
+    Notify("Light removed")
+end)
+
+addcmd('age', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    local msgs = {}
+    for _, name in pairs(players) do
+        local p = gPlayers[name]
+        if p then table.insert(msgs, p.Name .. "'s age: " .. p.AccountAge) end
+    end
+    if #msgs > 0 then Notify(table.concat(msgs, "\n")) end
+end)
+
+addcmd('os', {'platform', 'device'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    local msgs = {}
+    for _, name in pairs(players) do
+        local p = gPlayers[name]
+        if p then table.insert(msgs, p.Name .. "'s OS: " .. p.OsPlatform) end
+    end
+    if #msgs > 0 then Notify(table.concat(msgs, "\n")) end
+end)
+
+addcmd('bang', {'rape'}, function(args, speaker)
+    if not r15(Player) then
+        local players = getPlayer(args[1], speaker)
+        for _, name in pairs(players) do
+            bangAnim = Instance.new("Animation")
+            bangAnim.AnimationId = "rbxassetid://148840371"
+            bang = Player.Character.Humanoid:LoadAnimation(bangAnim)
+            bang:Play(.1, 1, 1)
+            bang:AdjustSpeed(3)
+            bangplr = name
+            Notify("Bang! (R6 required)")
+        end
+    else
+        Notify("R6 required for bang")
+    end
+end)
+
+addcmd('unbang', {'unrape'}, function(args, speaker)
+    bangplr = nil
+    if bang then bang:Stop() end
+    if bangAnim then bangAnim:Destroy() end
+end)
+
+addcmd('headsit', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        headsitting = true
+        Player.Character:FindFirstChildOfClass('Humanoid').Sit = true
+        spawn(function()
+            repeat
+                wait()
+                local plr = gPlayers[name]
+                if plr and plr.Character and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                    if Player.Character:FindFirstChildOfClass('Humanoid').Sit == true then
+                        Player.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 1.6, 0.4)
+                    else
+                        headsitting = false
+                    end
+                else
+                    headsitting = false
+                end
+            until not headsitting
+        end)
+    end
+end)
+
+addcmd('kill', {'fekill'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local target = gPlayers[name]
+        if target and target.Character then
+            local LocalPlayer = Player
+            local torsoname = "Torso"
+            if LocalPlayer.Character:FindFirstChild("Humanoid").RigType == Enum.HumanoidRigType.R15 then
+                torsoname = "UpperTorso"
+            end
+            local savepos = LocalPlayer.Character.HumanoidRootPart.CFrame
+            LocalPlayer.Character:FindFirstChild(torsoname).Anchored = true
+            local tool = Instance.new("Tool", LocalPlayer.Backpack)
+            local hat = LocalPlayer.Character:FindFirstChildOfClass("Accessory")
+            if hat then
+                local hathandle = hat.Handle
+                hathandle.Parent = tool
+                hathandle.Massless = true
+                tool.GripPos = Vector3.new(0, 9e99, 0)
+                tool.Parent = LocalPlayer.Character
+                repeat wait() until LocalPlayer.Character:FindFirstChildOfClass("Tool") ~= nil
+                tool.Grip = CFrame.new()
+                LocalPlayer.Character:FindFirstChild(torsoname).Anchored = false
+                repeat
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+                    wait()
+                until target.Character == nil or target.Character:FindFirstChild("Humanoid").Health <= 0 or LocalPlayer.Character == nil or LocalPlayer.Character:FindFirstChild("Humanoid").Health <= 0 or (target.Character:FindFirstChild("HumanoidRootPart").Velocity.magnitude - target.Character:FindFirstChild("Humanoid").WalkSpeed) > (target.Character:FindFirstChild("Humanoid").WalkSpeed + 20)
+                LocalPlayer.Character:FindFirstChild("Humanoid"):UnequipTools()
+                hathandle.Parent = hat
+                hathandle.Massless = false
+                tool:Destroy()
+                LocalPlayer.Character.HumanoidRootPart.CFrame = savepos
+                Notify("Killed " .. name)
+            else
+                Notify("No accessory found for kill")
+            end
+        end
+    end
+end)
+
+addcmd('bring', {'febring'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    if tools(Player) then
+        for _, name in pairs(players) do
+            local target = gPlayers[name]
+            if target and target.Character then
+                local LocalPlayer = Player
+                local ran1 = false
+                local equipped = false
+                local savepos = LocalPlayer.Character.HumanoidRootPart.CFrame
+                if #LocalPlayer.Backpack:GetChildren() < 2 then
+                    repeat
+                        for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+                            if tool:IsA("Tool") then tool.Parent = LocalPlayer end
+                        end
+                        LocalPlayer.Character:ClearAllChildren()
+                        local char = Instance.new("Model", workspace)
+                        char.Name = "character"
+                        Instance.new("Part", char).Name = "Torso"
+                        Instance.new("Part", char).Name = "Head"
+                        Instance.new("Humanoid", char).Name = "Humanoid"
+                        LocalPlayer.Character = char
+                        repeat wait() until LocalPlayer.Character
+                    until #LocalPlayer:GetChildren() - 4 >= 2
+                    for _, c in pairs(workspace:GetChildren()) do
+                        if c.Name == "character" and c:IsA("Model") then c:Destroy() end
+                    end
+                    repeat wait() until LocalPlayer.Character.HumanoidRootPart
+                    for _, tool in pairs(LocalPlayer:GetChildren()) do
+                        if tool:IsA("Tool") then tool.Parent = LocalPlayer.Backpack end
+                    end
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = savepos
+                end
+                LocalPlayer.Backpack:FindFirstChildOfClass("Tool").Parent = LocalPlayer.Character
+                LocalPlayer.Backpack:FindFirstChildOfClass("Tool").Parent = LocalPlayer.Character
+                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                tool.Parent = workspace
+                local attacher = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                attacher.Parent = workspace
+                LocalPlayer.Character.Humanoid:EquipTool(tool)
+                repeat wait() until LocalPlayer.Character:FindFirstChildOfClass("Tool") ~= nil
+                LocalPlayer.Character.Humanoid:UnequipTools()
+                attacher.AncestryChanged:Connect(function()
+                    if not ran1 then
+                        ran1 = true
+                        equipped = true
+                    end
+                end)
+                local anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://188632011"
+                local loadanim = LocalPlayer.Character.Humanoid:LoadAnimation(anim)
+                loadanim.Looped = true
+                loadanim:Play()
+                repeat
+                    target.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position + LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 2 + LocalPlayer.Character.HumanoidRootPart.CFrame.rightVector * 2)
+                    wait()
+                until equipped == true
+                loadanim:Stop()
+                anim:Destroy()
+                LocalPlayer.Character.Humanoid:EquipTool(tool)
+                wait()
+                LocalPlayer.Character.Humanoid:UnequipTools()
+                Notify("Brought " .. name)
+            end
+        end
+    else
+        Notify("You need a tool to bring")
+    end
+end)
+
+addcmd('fling', {}, function(args, speaker)
+    for _, child in pairs(Player.Character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            child.CustomPhysicalProperties = PhysicalProperties.new(2, 0.3, 0.5)
+        end
+    end
+    for _, v in pairs(Player.Character:GetChildren()) do
+        if v:IsA('Accessory') or v:IsA('Hat') then
+            for _, c in pairs(v:GetDescendants()) do
+                if c:IsA('Part') or c:IsA('MeshPart') then
+                    c.CustomPhysicalProperties = PhysicalProperties.new(0, 0.3, 0.5)
+                end
+            end
+        end
+    end
+    execCmd('noclip nonotify', Player, true)
+    wait(.1)
+    local bambam = Instance.new("BodyAngularVelocity", Player.Character.HumanoidRootPart)
+    bambam.Name = "Spinning"
+    bambam.AngularVelocity = Vector3.new(0, 311111, 0)
+    bambam.MaxTorque = Vector3.new(0, 311111, 0)
+    bambam.P = math.huge
+    TouchingFloor = Player.Character:FindFirstChildOfClass('Humanoid'):GetPropertyChangedSignal("FloorMaterial"):Connect(function()
+        if Player.Character:FindFirstChildOfClass("Humanoid") then
+            if Player.Character:FindFirstChildOfClass("Humanoid").FloorMaterial == Enum.Material.Air then
+                bambam.AngularVelocity = Vector3.new(0, 0, 0)
+            else
+                bambam.AngularVelocity = Vector3.new(0, 311111, 0)
+            end
+        end
+    end)
+    Notify("Fling enabled")
+end)
+
+addcmd('unfling', {'nofling'}, function(args, speaker)
+    execCmd('clip nonotify', Player, true)
+    if TouchingFloor then TouchingFloor:Disconnect() end
+    wait(.1)
+    for _, v in pairs(Player.Character.HumanoidRootPart:GetChildren()) do
+        if v:IsA('BodyAngularVelocity') then v:Destroy() end
+    end
+    for _, child in pairs(Player.Character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            child.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5)
+        end
+    end
+    Notify("Fling disabled")
+end)
+
+addcmd('loopoof', {}, function(args, speaker)
+    oofing = true
+    spawn(function()
+        repeat
+            wait(0.1)
+            for _, v in pairs(gPlayers:GetPlayers()) do
+                if v.Character and v.Character:FindFirstChild('Head') then
+                    for _, x in pairs(v.Character.Head:GetChildren()) do
+                        if x:IsA('Sound') then x.Playing = true end
+                    end
+                end
+            end
+        until not oofing
+    end)
+end)
+
+addcmd('unloopoof', {}, function(args, speaker)
+    oofing = false
+end)
+
+addcmd('respawn', {}, function(args, speaker)
+    respawn(Player)
+end)
+
+addcmd('refresh', {'re'}, function(args, speaker)
+    refresh(Player)
+end)
+
+addcmd('invisible', {'invis'}, function(args, speaker)
+    local function CheckRig()
+        if Player.Character then
+            local Humanoid = Player.Character:FindFirstChildOfClass('Humanoid')
+            if Humanoid then
+                return Humanoid.RigType == Enum.HumanoidRigType.R15 and 'R15' or 'R6'
+            end
+        end
+        return 'R6'
+    end
+    local function InitiateInvis()
+        local Character = Player.Character
+        if not Character then return end
+        local StoredCF = Character.PrimaryPart and Character.PrimaryPart.CFrame or CFrame.new()
+        local Part = Instance.new('Part', workspace)
+        Part.Size = Vector3.new(5, 0, 5)
+        Part.Anchored = true
+        Part.CFrame = CFrame.new(Vector3.new(9999, 9999, 9999))
+        if Character.PrimaryPart then
+            Character.PrimaryPart.CFrame = Part.CFrame * CFrame.new(0, 3, 0)
+        end
+        spawn(function()
+            wait(3)
+            Part:Destroy()
+        end)
+        if CheckRig() == 'R6' then
+            local Clone = Character.HumanoidRootPart:Clone()
+            Character.HumanoidRootPart:Destroy()
+            Clone.Parent = Character
+        else
+            local Clone = Character.LowerTorso.Root:Clone()
+            Character.LowerTorso.Root:Destroy()
+            Clone.Parent = Character.LowerTorso
+        end
+    end
+    InitiateInvis()
+    Notify("Invisible")
+end)
+
+addcmd('weaken', {}, function(args, speaker)
+    for _, child in pairs(Player.Character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            if args[1] then
+                child.CustomPhysicalProperties = PhysicalProperties.new(tonumber(args[1]), 0.3, 0.5)
+            else
+                child.CustomPhysicalProperties = PhysicalProperties.new(0, 0.3, 0.5)
+            end
+        end
+    end
+    Notify("Weakened")
+end)
+
+addcmd('strengthen', {}, function(args, speaker)
+    for _, child in pairs(Player.Character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            if args[1] then
+                child.CustomPhysicalProperties = PhysicalProperties.new(tonumber(args[1]), 0.3, 0.5)
+            else
+                child.CustomPhysicalProperties = PhysicalProperties.new(100, 0.3, 0.5)
+            end
+        end
+    end
+    Notify("Strengthened")
+end)
+
+addcmd('unweaken', {'unstrengthen'}, function(args, speaker)
+    for _, child in pairs(Player.Character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            child.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5)
+        end
+    end
+    Notify("Physical properties restored")
+end)
+
+addcmd('speed', {'ws'}, function(args, speaker)
+    if args[2] then
+        Player.Character:FindFirstChildOfClass('Humanoid').WalkSpeed = tonumber(args[2])
+    else
+        Player.Character:FindFirstChildOfClass('Humanoid').WalkSpeed = tonumber(args[1])
+    end
+end)
+
+addcmd('hipheight', {'hheight'}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        Player.Character:FindFirstChildOfClass('Humanoid').HipHeight = tonumber(args[1])
+    end
+end)
+
+addcmd('jumppower', {'jpower', 'jp'}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        Player.Character:FindFirstChildOfClass('Humanoid').JumpPower = tonumber(args[1])
+    end
+end)
+
+addcmd('gravity', {'grav'}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        workspace.Gravity = tonumber(args[1])
+    end
+end)
+
+addcmd('sit', {}, function(args, speaker)
+    speaker.Character:FindFirstChildOfClass("Humanoid").Sit = true
+end)
+
+addcmd('jump', {}, function(args, speaker)
+    speaker.Character:FindFirstChildOfClass("Humanoid").Jump = true
+end)
+
+addcmd('stun', {'platformstand'}, function(args, speaker)
+    Player.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
+end)
+
+addcmd('unstun', {'nostun', 'unplatformstand'}, function(args, speaker)
+    Player.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+end)
+
+addcmd('team', {}, function(args, speaker)
+    local teamname = getstring(1)
+    for _, team in pairs(game:GetService("Teams"):GetChildren()) do
+        if team.Name:lower():find(teamname:lower()) == 1 then
+            Player.Team = team
+            Notify("Changed to team: " .. team.Name)
+            return
+        end
+    end
+end)
+
+addcmd('goto', {'to'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            if speaker.Character then
+                speaker.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(4, 1, 0)
+            end
+        end
+    end
+end)
+
+addcmd('loopgoto', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        loopgoto = nil
+        wait()
+        loopgoto = gPlayers[name]
+        local distance = args[2] and isNumber(args[2]) and tonumber(args[2]) or 3
+        local lDelay = args[3] and isNumber(args[3]) and tonumber(args[3]) or 0
+        speaker.Character:FindFirstChildOfClass('Humanoid').Jump = true
+        spawn(function()
+            repeat
+                if loopgoto and loopgoto.Character and loopgoto.Character:FindFirstChild("HumanoidRootPart") and speaker.Character then
+                    speaker.Character.HumanoidRootPart.CFrame = loopgoto.Character.HumanoidRootPart.CFrame + Vector3.new(distance, 1, 0)
+                end
+                wait(lDelay)
+            until loopgoto ~= gPlayers[name]
+        end)
+    end
+end)
+
+addcmd('unloopgoto', {'noloopgoto'}, function(args, speaker)
+    loopgoto = nil
+end)
+
+addcmd('clientbring', {'cbring'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            if speaker.Character then
+                plr.Character.HumanoidRootPart.CFrame = speaker.Character.HumanoidRootPart.CFrame + Vector3.new(4, 1, 0)
+            end
+        end
+    end
+end)
+
+addcmd('loopbring', {}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        spawn(function()
+            if not FindInTable(bringT, name) then
+                table.insert(bringT, name)
+                local plr = gPlayers[name]
+                if not plr then return end
+                local distance = args[2] and isNumber(args[2]) and tonumber(args[2]) or 3
+                local lDelay = args[3] and isNumber(args[3]) and tonumber(args[3]) or 0
+                repeat
+                    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and speaker.Character then
+                        plr.Character.HumanoidRootPart.CFrame = speaker.Character.HumanoidRootPart.CFrame + Vector3.new(distance, 1, 0)
+                    end
+                    wait(lDelay)
+                until not FindInTable(bringT, name)
+            end
+        end)
+    end
+end)
+
+addcmd('unloopbring', {'noloopbring'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        for i = #bringT, 1, -1 do
+            if bringT[i] == name then table.remove(bringT, i) end
+        end
+    end
+end)
+
+addcmd('freeze', {'fr'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr and plr.Character then
+            for _, part in pairs(plr.Character:GetDescendants()) do
+                if part:IsA("BasePart") and not part.Anchored then
+                    part.Anchored = true
+                end
+            end
+        end
+    end
+end)
+
+addcmd('thaw', {'unfreeze', 'unfr'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr and plr.Character then
+            for _, part in pairs(plr.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.Anchored then
+                    part.Anchored = false
+                end
+            end
+        end
+    end
+end)
+
+addcmd('tpposition', {'tppos'}, function(args, speaker)
+    if #args < 3 then return end
+    local x, y, z = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
+    if x and y and z and Player.Character then
+        Player.Character.HumanoidRootPart.CFrame = CFrame.new(x, y, z)
+    end
+end)
+
+addcmd('offset', {}, function(args, speaker)
+    if #args < 3 then return end
+    local x, y, z = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
+    if x and y and z and Player.Character then
+        Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame + Vector3.new(x, y, z)
+    end
+end)
+
+addcmd('notifyposition', {'getpos', 'getposition'}, function(args, speaker)
+    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        Notify("Position: " .. tostring(Player.Character.HumanoidRootPart.Position))
+    end
+end)
+
+addcmd('copyposition', {'copypos'}, function(args, speaker)
+    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        toClipboard(tostring(Player.Character.HumanoidRootPart.Position))
+    end
+end)
+
+addcmd('spawnpoint', {'spawn'}, function(args, speaker)
+    if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        spawnpos = Player.Character.HumanoidRootPart.CFrame
+        spawnpoint = true
+        Notify("Spawn point set")
+    end
+end)
+
+addcmd('nospawnpoint', {'nospawn'}, function(args, speaker)
+    spawnpoint = false
+    Notify("Spawn point removed")
+end)
+
+addcmd('flashback', {'diedtp'}, function(args, speaker)
+    if lastDeath and Player.Character then
+        Player.Character.HumanoidRootPart.CFrame = lastDeath
+    end
+end)
+
+addcmd('animation', {'anim'}, function(args, speaker)
+    if not r15(Player) then
+        local pchar = Player.Character
+        local id = args[1]
+        if id then
+            local Anim = Instance.new("Animation")
+            Anim.AnimationId = "rbxassetid://" .. id
+            local track = pchar.Humanoid:LoadAnimation(Anim)
+            track:Play()
+            if args[2] and isNumber(args[2]) then
+                track:AdjustSpeed(tonumber(args[2]))
+            end
+            Notify("Playing animation")
+        end
+    else
+        Notify("R6 required for animations")
+    end
+end)
+
+addcmd('dance', {}, function(args, speaker)
+    if not r15(Player) then
+        local pchar = Player.Character
+        local anims = {'27789359','30196114','248263260','45834924','33796059','28488254','52155728'}
+        local id = anims[math.random(1, #anims)]
+        local animation = Instance.new("Animation")
+        animation.AnimationId = "rbxassetid://" .. id
+        animTrack = pchar.Humanoid:LoadAnimation(animation)
+        animTrack:Play()
+    else
+        Notify("R6 required for dance")
+    end
+end)
+
+addcmd('undance', {'nodance'}, function(args, speaker)
+    if animTrack then
+        animTrack:Stop()
+        animTrack:Destroy()
+    end
+end)
+
+addcmd('spasm', {}, function(args, speaker)
+    if not r15(Player) then
+        local pchar = Player.Character
+        local Anim = Instance.new("Animation")
+        Anim.AnimationId = "rbxassetid://33796059"
+        Spasm = pchar.Humanoid:LoadAnimation(Anim)
+        Spasm:Play()
+        Spasm:AdjustSpeed(99)
+        SpasmAnim = Anim
+    else
+        Notify("R6 required for spasm")
+    end
+end)
+
+addcmd('unspasm', {'nospasm'}, function(args, speaker)
+    if Spasm then Spasm:Stop() end
+    if SpasmAnim then SpasmAnim:Destroy() end
+end)
+
+addcmd('headthrow', {}, function(args, speaker)
+    if not r15(Player) then
+        local Anim = Instance.new("Animation")
+        Anim.AnimationId = "rbxassetid://35154961"
+        local track = Player.Character.Humanoid:LoadAnimation(Anim)
+        track:Play(0)
+        track:AdjustSpeed(1)
+    else
+        Notify("R6 required for headthrow")
+    end
+end)
+
+addcmd('noarms', {'rarms'}, function(args, speaker)
+    local char = Player.Character
+    if r15(Player) then
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") and (v.Name == "RightUpperArm" or v.Name == "LeftUpperArm") then
+                v:Destroy()
+            end
+        end
+    else
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") and (v.Name == "Right Arm" or v.Name == "Left Arm") then
+                v:Destroy()
+            end
+        end
+    end
+end)
+
+addcmd('nolegs', {'rlegs'}, function(args, speaker)
+    local char = Player.Character
+    if r15(Player) then
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") and (v.Name == "RightUpperLeg" or v.Name == "LeftUpperLeg") then
+                v:Destroy()
+            end
+        end
+    else
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") and (v.Name == "Right Leg" or v.Name == "Left Leg") then
+                v:Destroy()
+            end
+        end
+    end
+end)
+
+addcmd('nolimbs', {'rlimbs'}, function(args, speaker)
+    local char = Player.Character
+    if r15(Player) then
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") and (v.Name == "RightUpperLeg" or v.Name == "LeftUpperLeg" or v.Name == "RightUpperArm" or v.Name == "LeftUpperArm") then
+                v:Destroy()
+            end
+        end
+    else
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") and (v.Name == "Right Leg" or v.Name == "Left Leg" or v.Name == "Right Arm" or v.Name == "Left Arm") then
+                v:Destroy()
+            end
+        end
+    end
+end)
+
+addcmd('naked', {}, function(args, speaker)
+    for _, v in pairs(Player.Character:GetDescendants()) do
+        if v:IsA("Clothing") then v:Destroy() end
+    end
+end)
+
+addcmd('blockhead', {}, function(args, speaker)
+    local head = Player.Character and Player.Character:FindFirstChild("Head")
+    if head and head:FindFirstChild("Mesh") then
+        head.Mesh:Destroy()
+    end
+end)
+
+addcmd('blockhats', {}, function(args, speaker)
+    for _, v in pairs(Player.Character:GetChildren()) do
+        if v:IsA("Accessory") and v:FindFirstChild("Handle") and v.Handle:FindFirstChild("Mesh") then
+            v.Handle.Mesh:Destroy()
+        end
+    end
+end)
+
+addcmd('creeper', {}, function(args, speaker)
+    local char = Player.Character
+    if not char then return end
+    if r15(Player) then
+        if char:FindFirstChild("Head") and char.Head:FindFirstChild("Mesh") then char.Head.Mesh:Destroy() end
+        for _, part in pairs(char:GetChildren()) do
+            if part:IsA("BasePart") and (part.Name == "LeftUpperArm" or part.Name == "RightUpperArm") then
+                part:Destroy()
+            end
+        end
+    else
+        if char:FindFirstChild("Head") and char.Head:FindFirstChild("Mesh") then char.Head.Mesh:Destroy() end
+        for _, part in pairs(char:GetChildren()) do
+            if part:IsA("BasePart") and (part.Name == "Left Arm" or part.Name == "Right Arm") then
+                part:Destroy()
+            end
+        end
+    end
+    for _, v in pairs(char:GetDescendants()) do
+        if v:IsA("Hat") or v:IsA("Accessory") then
+            v.Parent = workspace
+        end
+    end
+end)
+
+addcmd('drophats', {'drophat'}, function(args, speaker)
+    if speaker.Character then
+        for _, obj in pairs(speaker.Character:GetChildren()) do
+            if obj:IsA("Accessory") then
+                obj.Parent = workspace
+            end
+        end
+    end
+end)
+
+addcmd('droptools', {'droptool'}, function(args, speaker)
+    if speaker.Character then
+        for _, obj in pairs(speaker.Character:GetChildren()) do
+            if obj:IsA("Tool") then obj.Parent = workspace end
+        end
+    end
+    if speaker:FindFirstChild("Backpack") then
+        for _, obj in pairs(speaker.Backpack:GetChildren()) do
+            if obj:IsA("Tool") then obj.Parent = workspace end
+        end
+    end
+end)
+
+addcmd('spin', {}, function(args, speaker)
+    local spinSpeed = args[1] and isNumber(args[1]) and tonumber(args[1]) or 20
+    local Spin = Instance.new("BodyAngularVelocity", Player.Character.HumanoidRootPart)
+    Spin.Name = "Spinning"
+    Spin.MaxTorque = Vector3.new(0, math.huge, 0)
+    Spin.AngularVelocity = Vector3.new(0, spinSpeed, 0)
+end)
+
+addcmd('unspin', {}, function(args, speaker)
+    for _, v in pairs(Player.Character.HumanoidRootPart:GetChildren()) do
+        if v.Name == "Spinning" then v:Destroy() end
+    end
+end)
+
+addcmd('spinhats', {'hatspin'}, function(args, speaker)
+    for _, v in pairs(Player.Character:GetDescendants()) do
+        if v:IsA("Accessory") or v:IsA("Hat") then
+            local keep = Instance.new("BodyPosition", v.Handle)
+            keep.Name = "no"
+            local spin = Instance.new("BodyAngularVelocity", v.Handle)
+            spin.Name = "ha"
+            if v.Handle:FindFirstChild("AccessoryWeld") then
+                v.Handle.AccessoryWeld:Destroy()
+            end
+            local speed = args[1] and isNumber(args[1]) and tonumber(args[1]) or 100
+            spin.AngularVelocity = Vector3.new(0, speed, 0)
+            spin.MaxTorque = Vector3.new(0, speed * 2, 0)
+            keep.P = 30000
+            keep.D = 50
+            spinning = keep
+            spinenabled = true
+        end
+    end
+end)
+
+addcmd('unspinhats', {'unhatspin'}, function(args, speaker)
+    for _, v in pairs(Player.Character:GetDescendants()) do
+        if v:IsA("Accessory") or v:IsA("Hat") then
+            pcall(function()
+                if v:IsA("Accessory") or v:IsA("Hat") then v.Parent = workspace end
+                wait(0.5)
+                if v.Handle:FindFirstChild("no") then v.Handle.no:Destroy() end
+                if v.Handle:FindFirstChild("ha") then v.Handle.ha:Destroy() end
+                if v:IsA("Accessory") or v:IsA("Hat") then v.Parent = Player.Character end
+            end)
+        end
+    end
+    spinenabled = false
+end)
+
+addcmd('tools', {'gears'}, function(args, speaker)
+    local function copy(instance)
+        for _, c in pairs(instance:GetChildren()) do
+            if c:IsA('Tool') or c:IsA('HopperBin') then
+                c:Clone().Parent = Player.Backpack
+            end
+            copy(c)
+        end
+    end
+    copy(game:GetService("Lighting"))
+    copy(game:GetService("ReplicatedStorage"))
+    Notify("Copied tools from Lighting and ReplicatedStorage")
+end)
+
+addcmd('notools', {'rtools', 'removetools'}, function(args, speaker)
+    for _, v in pairs(Player.Backpack:GetDescendants()) do
+        if v:IsA('Tool') or v:IsA('HopperBin') then v:Destroy() end
+    end
+    for _, v in pairs(Player.Character:GetDescendants()) do
+        if v:IsA('Tool') or v:IsA('HopperBin') then v:Destroy() end
+    end
+    Notify("Removed tools")
+end)
+
+addcmd('grabtools', {}, function(args, speaker)
+    gtools = true
+    workspace.ChildAdded:Connect(function(part)
+        if gtools and part:IsA("Tool") and part:FindFirstChild("Handle") then
+            part.Handle.CFrame = Player.Character.HumanoidRootPart.CFrame
+        end
+    end)
+    Notify("Grabtools enabled")
+end)
+
+addcmd('ungrabtools', {'nograbtools'}, function(args, speaker)
+    gtools = false
+    Notify("Grabtools disabled")
+end)
+
+addcmd('copytools', {'clonetools'}, function(args, speaker)
+    local players = getPlayer(args[1], speaker)
+    for _, name in pairs(players) do
+        local plr = gPlayers[name]
+        if plr then
+            for _, tool in pairs(plr.Backpack:GetChildren()) do
+                if tool:IsA('Tool') or tool:IsA('HopperBin') then
+                    tool:Clone().Parent = Player.Backpack
+                end
+            end
+        end
+    end
+    Notify("Copied tools from " .. table.concat(players, ", "))
+end)
+
+addcmd('xray', {}, function(args, speaker)
+    transparent = true
+    for _, i in pairs(workspace:GetDescendants()) do
+        if i:IsA("BasePart") and not i.Parent:FindFirstChild("Humanoid") and not (i.Parent and i.Parent.Parent and i.Parent.Parent:FindFirstChild("Humanoid")) then
+            i.LocalTransparencyModifier = 0.5
+        end
+    end
+    Notify("Xray enabled")
+end)
+
+addcmd('unxray', {'noxray'}, function(args, speaker)
+    transparent = false
+    for _, i in pairs(workspace:GetDescendants()) do
+        if i:IsA("BasePart") then
+            i.LocalTransparencyModifier = 0
+        end
+    end
+    Notify("Xray disabled")
+end)
+
+addcmd('togglexray', {}, function(args, speaker)
+    transparent = not transparent
+    if transparent then
+        for _, i in pairs(workspace:GetDescendants()) do
+            if i:IsA("BasePart") and not i.Parent:FindFirstChild("Humanoid") and not (i.Parent and i.Parent.Parent and i.Parent.Parent:FindFirstChild("Humanoid")) then
+                i.LocalTransparencyModifier = 0.5
+            end
+        end
+        Notify("Xray enabled")
+    else
+        for _, i in pairs(workspace:GetDescendants()) do
+            if i:IsA("BasePart") then
+                i.LocalTransparencyModifier = 0
+            end
+        end
+        Notify("Xray disabled")
+    end
+end)
+
+addcmd('addplugin', {'plugin'}, function(args, speaker)
+    Notify("Plugin system not available in standalone")
+end)
+
+addcmd('removeplugin', {'deleteplugin'}, function(args, speaker)
+    Notify("Plugin system not available in standalone")
+end)
+
+addcmd('cmds', {}, function(args)
+    local CMDsFolder = Instance.new("Folder", game.CoreGui)
+    for i, v in pairs(CMDs) do
+        local CMDsValue = Instance.new("StringValue", CMDsFolder)
+        CMDsValue.Value = v
+        CMDsValue.RobloxLocked = true
+    end
+    
+    local cmdGUI = Instance.new("ScreenGui", Player.PlayerGui)
+    cmdGUI.Name = "CMDs"
+    
+    local cmdMAIN = Instance.new("Frame", cmdGUI)
+    cmdMAIN.Name = "MAIN"
+    cmdMAIN.Active = true
+    cmdMAIN.BackgroundColor = BrickColor.new(0, 0, 0)
+    cmdMAIN.BackgroundTransparency = 0.5
+    cmdMAIN.BorderColor = BrickColor.new(0, 0, 0)
+    cmdMAIN.BorderSizePixel = 0
+    cmdMAIN.Position = UDim2.new(0, 10, 0, 350)
+    cmdMAIN.Size = UDim2.new(0, 170, 0, 15)
+    cmdMAIN.Draggable = true
+    
+    local cmdCMDs = Instance.new("ScrollingFrame", cmdMAIN)
+    cmdCMDs.Name = "CMDs"
+    cmdCMDs.BackgroundColor = BrickColor.new(0, 0, 0)
+    cmdCMDs.BackgroundTransparency = 0.8
+    cmdCMDs.BorderColor = BrickColor.new(0, 0, 0)
+    cmdCMDs.BorderSizePixel = 0
+    cmdCMDs.Position = UDim2.new(0, 0, 0, 15)
+    cmdCMDs.Size = UDim2.new(0, 200, 0, 150)
+    cmdCMDs.CanvasSize = UDim2.new(0, 0, 0, 0)
+    cmdCMDs.TopImage = 'rbxasset://textures/blackBkg_square.png'
+    cmdCMDs.MidImage = 'rbxasset://textures/blackBkg_square.png'
+    cmdCMDs.BottomImage = 'rbxasset://textures/blackBkg_square.png'
+    cmdCMDs.ScrollBarThickness = 2
+    
+    local cmdExit = Instance.new("TextButton", cmdMAIN)
+    cmdExit.Name = "Exit"
+    cmdExit.BackgroundColor = BrickColor.new(255, 0, 0)
+    cmdExit.BackgroundTransparency = 0.5
+    cmdExit.BorderColor = BrickColor.new(255, 0, 0)
+    cmdExit.BorderSizePixel = 0
+    cmdExit.Position = UDim2.new(0, 185, 0, 0)
+    cmdExit.Size = UDim2.new(0, 15, 0, 15)
+    cmdExit.Text = ""
+    cmdExit.MouseButton1Click:Connect(function()
+        cmdGUI:Destroy()
+    end)
+    
+    local cmdMin = Instance.new("TextButton", cmdMAIN)
+    cmdMin.Name = "MM"
+    cmdMin.BackgroundColor = BrickColor.new(140, 140, 140)
+    cmdMin.BackgroundTransparency = 0.5
+    cmdMin.BorderColor = BrickColor.new(140, 140, 140)
+    cmdMin.BorderSizePixel = 0
+    cmdMin.Position = UDim2.new(0, 170, 0, 0)
+    cmdMin.Size = UDim2.new(0, 15, 0, 15)
+    cmdMin.Text = ""
+    cmdMin.MouseButton1Click:Connect(function()
+        cmdCMDs.Visible = not cmdCMDs.Visible
+    end)
+    
+    local cmdEx = Instance.new("TextLabel", cmdMAIN)
+    cmdEx.Name = "Example"
+    cmdEx.BackgroundColor = BrickColor.new(0, 0, 0)
+    cmdEx.BackgroundTransparency = 0.8
+    cmdEx.BorderColor = BrickColor.new(0, 0, 0)
+    cmdEx.BorderSizePixel = 0
+    cmdEx.Position = UDim2.new(0, 5, 0, 20)
+    cmdEx.Size = UDim2.new(0, 190, 0, 20)
+    cmdEx.Visible = false
+    cmdEx.TextColor = BrickColor.new(255, 255, 255)
+    cmdEx.TextXAlignment = 'Left'
+    
+    local CMDsV = CMDsFolder:GetChildren()
+    for i = 1, #CMDsV do
+        local YSize = 25
+        local Position = ((i * YSize) - YSize)
+        local newcmd = cmdEx:Clone()
+        newcmd.Parent = cmdCMDs
+        newcmd.Visible = true
+        newcmd.Position = UDim2.new(0, 5, 0, Position + 5)
+        newcmd.Text = "" .. CMDsV[i].Value
+        cmdCMDs.CanvasSize = UDim2.new(0, 0, 0, Position + 30)
+    end
+    
+    CMDsFolder:Destroy()
+end)
+
+local function setupChat()
+    for i, v in pairs(services.events) do
+        services.events:remove(i)
+        v:disconnect()
+    end
+    for _, v in pairs(gPlayers:GetPlayers()) do
+        local ev = v.Chatted:connect(function(msg)
+            if msg:sub(1,1) == "?" then
+                handleHelp(msg:sub(2), v)
+            else
+                do_exec(msg, v)
+            end
+        end)
+        services.events[#services.events + 1] = ev
+    end
+end
+
+setupChat()
+
+for _, v in pairs(admins) do
+    local adminVal = Instance.new("StringValue", AdminFolder)
+    adminVal.Value = v
+    adminVal.RobloxLocked = true
+end
+
+local CMDbar = Instance.new('ScreenGui', Player.PlayerGui)
+CMDbar.Name = 'GUI'
+
+local cmdBAR = Instance.new('TextBox', CMDbar)
+cmdBAR.Name = 'CMDbar'
+cmdBAR.Active = true
+cmdBAR.BackgroundColor = BrickColor.new(0, 0, 0)
+cmdBAR.BackgroundTransparency = 0.5
+cmdBAR.BorderColor = BrickColor.new(0, 0, 0)
+cmdBAR.BorderSizePixel = 0
+cmdBAR.Position = UDim2.new(0, 0, 1, -25)
+cmdBAR.Size = UDim2.new(0, 200, 0, 20)
+cmdBAR.Font = 'SourceSans'
+cmdBAR.FontSize = 'Size18'
+cmdBAR.Text = 'Press ; to Execute a Command'
+cmdBAR.TextColor = BrickColor.new(255, 255, 255)
+
+local cmdButton = Instance.new("TextButton", CMDbar)
+cmdButton.Name = "CmdButton"
+cmdButton.Size = UDim2.new(0, 40, 0, 25)
+cmdButton.Position = UDim2.new(1, -45, 1, -25)
+cmdButton.BackgroundColor = BrickColor.new(255, 255, 255)
+cmdButton.BackgroundTransparency = 0.4
+cmdButton.BorderColor = BrickColor.new(0, 0, 0)
+cmdButton.BorderSizePixel = 0
+cmdButton.Text = ";"
+cmdButton.TextColor = BrickColor.new(0, 0, 0)
+cmdButton.Font = "SourceSans"
+cmdButton.FontSize = "Size18"
+cmdButton.MouseButton1Click:Connect(function()
+    cmdBAR:TweenPosition(UDim2.new(0, 0, 1, -25), "InOut", "Quad", 0.5, true, nil)
+    cmdBAR:CaptureFocus()
+end)
+
+cmdBAR.FocusLost:Connect(function(enterpressed)
+    if enterpressed and cmdBAR.Text ~= "" then
+        spawn(function()
+            execCmd(cmdBAR.Text, Player)
+        end)
+    end
+    cmdBAR:TweenPosition(UDim2.new(0, -200, 1, -25), "InOut", "Quad", 0.5, true, nil)
+end)
+
+Player:GetMouse().KeyDown:Connect(function(Key)
+    if Key:byte() == 59 then
+        cmdBAR:TweenPosition(UDim2.new(0, 0, 1, -25), "InOut", "Quad", 0.5, true, nil)
+        cmdBAR:CaptureFocus()
+    end
+end)
+
+local notifyMAIN = Instance.new('ScreenGui', Player.PlayerGui)
+notifyMAIN.Name = 'Notification'
+
+local notifyNOT = Instance.new('Frame', notifyMAIN)
+notifyNOT.Name = 'NOTIFY'
+notifyNOT.BackgroundColor = BrickColor.new(0, 0, 0)
+notifyNOT.BackgroundTransparency = 0.5
+notifyNOT.BorderColor = BrickColor.new(255, 255, 255)
+notifyNOT.BorderSizePixel = 2
+notifyNOT.Position = UDim2.new(0, -200, 0.7, 0)
+notifyNOT.Size = UDim2.new(0, 200, 0, 30)
+
+local notifyNOTE = Instance.new('TextLabel', notifyNOT)
+notifyNOTE.Name = 'NOTE'
+notifyNOTE.BackgroundColor = BrickColor.new(255, 255, 255)
+notifyNOTE.BackgroundTransparency = 1
+notifyNOTE.BorderColor = BrickColor.new(255, 255, 255)
+notifyNOTE.BorderSizePixel = 0
+notifyNOTE.Size = UDim2.new(1, 0, 1, 0)
+notifyNOTE.ZIndex = 10
+notifyNOTE.FontSize = 'Size18'
+notifyNOTE.Font = 'SourceSans'
+notifyNOTE.Text = 'NOTIFY'
+notifyNOTE.TextColor = BrickColor.new(255, 255, 255)
+notifyNOTE.TextStrokeColor3 = Color3.new(255, 255, 255)
+notifyNOTE.TextStrokeTransparency = 0.8
+
+local usingNOTE = false
+
+function Notify(msg)
+    if usingNOTE == false then
+        spawn(function()
+            notifyNOT:TweenPosition(UDim2.new(0, 0, 0.7, 0), "InOut", "Quad", 0.5, true, nil)
+            notifyNOTE.Text = msg
+            usingNOTE = true
+            wait(2.5)
+            notifyNOT:TweenPosition(UDim2.new(0, -200, 0.7, 0), "InOut", "Quad", 0.5, true, nil)
+            usingNOTE = false
+        end)
+    end
+end
+
+wait(1)
+
+Notify('Loaded ' .. #cmds .. ' commands!')
+wait(3.5)
+Notify('Welcome ' .. Player.Name .. '!')
+
+Player.CharacterAdded:Connect(function()
+    FLYING = false
+    Floating = false
+    bangplr = nil
+    if not Clip then
+        execCmd('clip nonotify', Player, true)
+    end
+    if spawnpoint and not refreshCmd and spawnpos then
+        wait(.1)
+        Player.Character.HumanoidRootPart.CFrame = spawnpos
+    end
+    onDied()
+    if #spawnCmds > 0 then
+        for _, v in pairs(spawnCmds) do
+            spawn(function()
+                wait(v.DELAY)
+                execCmd(v.COMMAND, Player, true)
+            end)
+        end
+    end
+end)
+
+onDied()
