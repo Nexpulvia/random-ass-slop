@@ -2643,7 +2643,7 @@ cmdBAR.BackgroundColor3 = Color3.new(0,0,0)
 cmdBAR.BackgroundTransparency = 0.5
 cmdBAR.BorderColor3 = Color3.new(0,0,0)
 cmdBAR.BorderSizePixel = 0
-cmdBAR.Position = UDim2.new(0, 0, 1, -25)
+cmdBAR.Position = UDim2.new(0, -200, 1, -25)
 cmdBAR.Size = UDim2.new(0, 200, 0, 20)
 cmdBAR.Font = Enum.Font.SourceSans
 cmdBAR.TextSize = 18
@@ -2665,18 +2665,23 @@ cmdButton.Font = Enum.Font.SourceSans
 cmdButton.TextSize = 18
 cmdButton.MouseButton1Click:Connect(function()
     cmdBAR:TweenPosition(UDim2.new(0, 0, 1, -25), "InOut", "Quad", 0.5, true, nil)
-    wait(0.1)
+    wait(0.15)
     cmdBAR:CaptureFocus()
+    cmdBAR.Text = ""
 end)
 
 cmdBAR.FocusLost:Connect(function(enterpressed)
-    if enterpressed and cmdBAR.Text ~= "" and cmdBAR.Text ~= "Type command here..." then
-        spawn(function()
-            execCmd(cmdBAR.Text, Player)
-        end)
-        cmdBAR.Text = "Type command here..."
+    if enterpressed then
+        local cmd = cmdBAR.Text
+        if cmd ~= "" and cmd ~= "Type command here..." then
+            spawn(function()
+                execCmd(cmd, Player)
+            end)
+            cmdBAR.Text = "Type command here..."
+        end
+        wait(0.1)
+        cmdBAR:TweenPosition(UDim2.new(0, -200, 1, -25), "InOut", "Quad", 0.5, true, nil)
     end
-    cmdBAR:TweenPosition(UDim2.new(0, -200, 1, -25), "InOut", "Quad", 0.5, true, nil)
 end)
 
 -- Handles ; key press without typing it
@@ -2684,7 +2689,7 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Semicolon then
         cmdBAR:TweenPosition(UDim2.new(0, 0, 1, -25), "InOut", "Quad", 0.5, true, nil)
-        wait(0.1)
+        wait(0.15)
         cmdBAR:CaptureFocus()
         cmdBAR.Text = ""
     end
