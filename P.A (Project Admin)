@@ -2632,53 +2632,61 @@ for _, v in pairs(admins) do
     adminVal.RobloxLocked = true
 end
 
+-- FIXED CMD BAR - PRESS ; WITHOUT TYPING IT
 local CMDbar = Instance.new('ScreenGui', Player.PlayerGui)
 CMDbar.Name = 'GUI'
 
 local cmdBAR = Instance.new('TextBox', CMDbar)
 cmdBAR.Name = 'CMDbar'
 cmdBAR.Active = true
-cmdBAR.BackgroundColor = BrickColor.new(0, 0, 0)
+cmdBAR.BackgroundColor3 = Color3.new(0,0,0)
 cmdBAR.BackgroundTransparency = 0.5
-cmdBAR.BorderColor = BrickColor.new(0, 0, 0)
+cmdBAR.BorderColor3 = Color3.new(0,0,0)
 cmdBAR.BorderSizePixel = 0
 cmdBAR.Position = UDim2.new(0, 0, 1, -25)
 cmdBAR.Size = UDim2.new(0, 200, 0, 20)
-cmdBAR.Font = 'SourceSans'
-cmdBAR.FontSize = 'Size18'
-cmdBAR.Text = 'Press ; to Execute a Command'
-cmdBAR.TextColor = BrickColor.new(255, 255, 255)
+cmdBAR.Font = Enum.Font.SourceSans
+cmdBAR.TextSize = 18
+cmdBAR.Text = 'Type command here...'
+cmdBAR.TextColor3 = Color3.new(1,1,1)
+cmdBAR.ClearTextOnFocus = false
 
 local cmdButton = Instance.new("TextButton", CMDbar)
 cmdButton.Name = "CmdButton"
 cmdButton.Size = UDim2.new(0, 40, 0, 25)
 cmdButton.Position = UDim2.new(1, -45, 1, -25)
-cmdButton.BackgroundColor = BrickColor.new(255, 255, 255)
+cmdButton.BackgroundColor3 = Color3.new(1,1,1)
 cmdButton.BackgroundTransparency = 0.4
-cmdButton.BorderColor = BrickColor.new(0, 0, 0)
+cmdButton.BorderColor3 = Color3.new(0,0,0)
 cmdButton.BorderSizePixel = 0
 cmdButton.Text = ";"
-cmdButton.TextColor = BrickColor.new(0, 0, 0)
-cmdButton.Font = "SourceSans"
-cmdButton.FontSize = "Size18"
+cmdButton.TextColor3 = Color3.new(0,0,0)
+cmdButton.Font = Enum.Font.SourceSans
+cmdButton.TextSize = 18
 cmdButton.MouseButton1Click:Connect(function()
     cmdBAR:TweenPosition(UDim2.new(0, 0, 1, -25), "InOut", "Quad", 0.5, true, nil)
+    wait(0.1)
     cmdBAR:CaptureFocus()
 end)
 
 cmdBAR.FocusLost:Connect(function(enterpressed)
-    if enterpressed and cmdBAR.Text ~= "" then
+    if enterpressed and cmdBAR.Text ~= "" and cmdBAR.Text ~= "Type command here..." then
         spawn(function()
             execCmd(cmdBAR.Text, Player)
         end)
+        cmdBAR.Text = "Type command here..."
     end
     cmdBAR:TweenPosition(UDim2.new(0, -200, 1, -25), "InOut", "Quad", 0.5, true, nil)
 end)
 
-Player:GetMouse().KeyDown:Connect(function(Key)
-    if Key:byte() == 59 then
+-- Handles ; key press without typing it
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Semicolon then
         cmdBAR:TweenPosition(UDim2.new(0, 0, 1, -25), "InOut", "Quad", 0.5, true, nil)
+        wait(0.1)
         cmdBAR:CaptureFocus()
+        cmdBAR.Text = ""
     end
 end)
 
