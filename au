@@ -1,21 +1,15 @@
--- Sound Visualizer – reacts to "KohlsMusic" (2016-safe)
+-- Random Sound Visualizer (no audio needed)
+-- LocalScript in StarterPlayer > StarterCharacterScripts
+
 local Players    = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
-local function log(...) print("[Visualizer]", ...) end
-log("Loaded")
-
--- Wait for character + root
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Root = Character:FindFirstChild("HumanoidRootPart")
     or Character:FindFirstChild("Torso")
     or Character:WaitForChild("HumanoidRootPart", 10)
-if not Root then
-    warn("[Visualizer] No root part found")
-    return
-end
-log("Root =", Root)
+if not Root then return end
 
 -- Clean up old Soundbar
 for _, v in pairs(Character:GetChildren()) do
@@ -40,17 +34,16 @@ for i = 0, BAR_COUNT - 1 do
     p.Parent = Soundbar
 
     local m = Instance.new("SpecialMesh")
-    m.Name     = "Mesh"
-    m.MeshId   = "rbxassetid://9856898"
-    m.Scale    = Vector3.new(1, 0.4, 1)
-    m.TextureId= "rbxassetid://2114473"
-    m.MeshType = Enum.MeshType.FileMesh
-    m.Parent   = p
+    m.Name      = "Mesh"
+    m.MeshId    = "rbxassetid://9856898"
+    m.Scale     = Vector3.new(1, 0.4, 1)
+    m.TextureId = "rbxassetid://2114473"
+    m.MeshType  = Enum.MeshType.FileMesh
+    m.Parent    = p
 
     Bars[#Bars + 1] = p
     BarByName[p.Name] = p
 end
-log("Bars created:", #Bars)
 
 local nBars  = #Bars - 1
 local Height = 20
@@ -96,7 +89,6 @@ local function Quad(obj, val, ease, d)
     end)
 end
 
--- Bar manipulation
 local Set
 local function CheckSet(N, S, D)
     local bar = BarByName[tostring(N)]
@@ -133,70 +125,31 @@ spawn(function()
     end)
 end)
 
--- Search for a Sound named KohlsMusic anywhere reachable
-local function deepFind(parent, name)
-    for _, obj in ipairs(parent:GetChildren()) do
-        if obj:IsA("Sound") and obj.Name == name then
-            return obj
-        end
-        local found = deepFind(obj, name)
-        if found then return found end
-    end
-end
-
-local function findKohlsMusic()
-    local places = {
-        LocalPlayer:FindFirstChild("PlayerGui"),
-        game:FindFirstChild("CoreGui"),
-        workspace,
-        game:GetService("Lighting"),
-    }
-    for _, place in ipairs(places) do
-        if place then
-            local s = deepFind(place, "KohlsMusic")
-            if s then return s end
-        end
-    end
-end
-
--- Fallback: any currently playing Sound in workspace
-local function findAnyPlayingSound()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Sound") and obj.IsPlaying then
-            return obj
-        end
-    end
-end
-
--- React loop
-local kohlsSound
-local lastSearch  = 0
+-- Fake "loudness" using layered sine waves so it looks musical
 local maxLoudness = 1
-local loggedFound = false
-
 spawn(function()
-    RunService.RenderStepped:connect(function()
-        -- Re-search once a second
-        if not kohlsSound or not kohlsSound.Parent then
-            if tick() - lastSearch > 1 then
-                lastSearch = tick()
-                kohlsSound = findKohlsMusic() or findAnyPlayingSound()
-                if kohlsSound and not loggedFound then
-                    loggedFound = true
-                    log("Using sound:", kohlsSound:GetFullName())
-                end
-            end
+    while true do
+        local t = tick()
+
+        -- Combine several sine waves at different speeds for a beat-like feel
+        local wave =
+            math.sin(t * 6.0) * 0.5 +
+            math.sin(t * 3.1) * 0.3 +
+            math.sin(t * 11.7) * 0.2
+
+        -- Add a random spike every so often
+        if math.random() < 0.08 then
+            wave = wave + math.random() * 0.8
         end
 
-        if kohlsSound then
-            local pl = kohlsSound.PlaybackLoudness
-            if kohlsSound.IsPlaying and pl and pl > 0 then
-                maxLoudness = math.max(pl, maxLoudness * 0.999)
-                local normalized = pl / maxLoudness
-                Set(math.floor(normalized * nBars), normalized * Height)
-            else
-                maxLoudness = math.max(1, maxLoudness * 0.95)
-            end
-        end
-    end)
+        -- Normalize into 0..1 range
+        local pl = math.clamp((wave + 1) / 2, 0, 1)
+
+        maxLoudness = math.max(pl, maxLoudness * 0.95)
+        local normalized = pl / maxLoudness
+
+        Set(math.floor(normalized * nBars), normalized * Height)
+
+        RunService.RenderStepped:Wait()
+    end
 end)
