@@ -1,5 +1,5 @@
--- Sound Visualizer (reacts to any Sound in Workspace)
--- LocalScript in StarterCharacterScripts
+-- Sound Visualizer – reacts to a Sound named "KohlsMusic"
+-- LocalScript in StarterPlayer > StarterCharacterScripts
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,7 +7,7 @@ local LocalPlayer = Players.LocalPlayer
 
 -- Wait for character
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Root = Character:FindFirstChild("Torso") or Character:FindFirstChild("HumanoidRootPart")
+local Root = Character:FindFirstChild("HumanoidRootPart") or Character:FindFirstChild("Torso")
 if not Root then
 	Root = Character:WaitForChild("HumanoidRootPart", 5) or Character:WaitForChild("Torso", 5)
 end
@@ -145,24 +145,42 @@ spawn(function()
 	end)
 end)
 
--- React to the loudest playing Sound in Workspace
+-- Search for a Sound named "KohlsMusic" anywhere in the game
+local function findKohlsMusic()
+	local function search(parent)
+		for _, obj in ipairs(parent:GetChildren()) do
+			if obj:IsA("Sound") and obj.Name == "KohlsMusic" then
+				return obj
+			end
+			local found = search(obj)
+			if found then return found end
+		end
+	end
+	return search(game)
+end
+
+-- React to the KohlsMusic sound
+local kohlsSound = nil
 local maxLoudness = 1
+local lastSearch = 0
+
 spawn(function()
 	RunService.RenderStepped:Connect(function()
-		local loudest = 0
-		for _, obj in ipairs(workspace:GetDescendants()) do
-			if obj:IsA("Sound") and obj.IsPlaying then
-				local pl = obj.PlaybackLoudness
-				if pl and pl > loudest then
-					loudest = pl
-				end
+		-- Re‑search once per second if we don’t have a valid sound
+		if not kohlsSound or not kohlsSound.Parent then
+			if tick() - lastSearch > 1 then
+				lastSearch = tick()
+				kohlsSound = findKohlsMusic()
 			end
 		end
 
-		if loudest > 0 then
-			maxLoudness = math.max(loudest, maxLoudness * 0.999)
-			local normalized = loudest / maxLoudness
-			Set(math.floor(normalized * nBars), normalized * Height)
+		if kohlsSound and kohlsSound.IsPlaying then
+			local pl = kohlsSound.PlaybackLoudness
+			if pl and pl > 0 then
+				maxLoudness = math.max(pl, maxLoudness * 0.999)
+				local normalized = pl / maxLoudness
+				Set(math.floor(normalized * nBars), normalized * Height)
+			end
 		else
 			maxLoudness = math.max(1, maxLoudness * 0.95)
 		end
